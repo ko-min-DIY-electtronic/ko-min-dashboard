@@ -6,13 +6,12 @@ import getAllCategory from "../../api/inventoryApi/GetAllCategory";
 import getAProducts from "../../api/inventoryApi/getAproduct";
 import Loading from "../utli/Loading";
 import { useParams } from "react-router-dom";
-import { MdOutlineEdit } from "react-icons/md";
-import deleteStock from "../../api/inventoryApi/DeleteStock";
+import updateProduct from "../../api/inventoryApi/UpdateProduct";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [porductId, setProductId] = useState(null);
+  const [productId, setProductId] = useState(null);
   const [formData, setFormData] = useState({
     productName: "",
     productCode: "",
@@ -31,19 +30,11 @@ const ProductDetail = () => {
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
 
-  const [wholesalePrices, setWholesalePrices] = useState([]);
+  const [wholesalePrices, setWholesalePrices] = useState([
+    { id: 1, qty: "", price: "" },
+  ]);
   const [loading, setLoading] = useState(false);
 
-  const deleteProduct = async (productId) => {
-    try {
-      const response = await deleteStock(productId);
-      if (response.status === "success") {
-        navigate("/");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
   const validateField = (name, value) => {
     const requiredFields = [
       "productName",
@@ -92,17 +83,17 @@ const ProductDetail = () => {
     }
   };
 
-  // const getCategoryName = async () => {
-  //   // setLoading(true);
-  //   const response = await getAllCategory();
-  //   if (response.status === "success") {
-  //     console.log(response.data);
-  //     setCategoryOptions(response.data.map((category) => category.category));
-  //     // setCategory(response.data);
-  //     // setLoading(false);
-  //   } else if (response.status === "error") {
-  //   }
-  // };
+  const getCategoryName = async () => {
+    // setLoading(true);
+    const response = await getAllCategory();
+    if (response.status === "success") {
+      // console.log(response.data);
+      setCategoryOptions(response.data.map((category) => category.category));
+      // setCategory(response.data);
+      // setLoading(false);
+    } else if (response.status === "error") {
+    }
+  };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -166,39 +157,29 @@ const ProductDetail = () => {
       return;
     }
 
-    console.log("Form submitted:", formData);
+    const data = {
+      name: formData.productName,
+      productCode: formData.productCode,
+      retailUnitPrice: formData.retailPrice,
+      stockQuantity: formData.totalQuantity,
+      weight: formData.weight,
+      description: formData.description,
+      category: formData.productCategory,
+      onSale: formData.storeInventory === "sellProduct" ? true : false,
+      wholeSale: wholesalePrices.map((price) => ({
+        wholeSaleQuantity: price.qty,
+        wholeSaleUnitPrice: price.price,
+      })),
+    };
 
-    const data = new FormData();
-    data.append("name", formData.productName);
-    data.append("productCode", formData.productCode);
-    data.append("retailUnitPrice", formData.retailPrice);
-    data.append("stockQuantity", formData.totalQuantity);
-    data.append("weight", formData.weight);
-    data.append("description", formData.description);
-    data.append("category", formData.productCategory);
-    data.append(
-      "onSale",
-      formData.storeInventory === "sellProduct" ? true : false
-    );
-    if (uploadedImages.length > 0) {
-      uploadedImages.forEach((img) => {
-        data.append("images", img.file);
-      });
-    }
-    wholesalePrices.forEach((price, index) => {
-      data.append(`wholeSale[${index}][wholeSaleQuantity]`, price.qty);
-      data.append(`wholeSale[${index}][wholeSaleUnitPrice]`, price.price);
-    });
-    console.log(data);
-    const res = await addProduct(data);
-    console.log(res);
+    const res = await updateProduct({ productId, data });
     if (res.status === "success") {
       navigate("/");
     }
   };
 
   const addWholesalePrice = () => {
-    const newId = Math.max(...wholesalePrices.map((w) => w.id)) + 1;
+    const newId = wholesalePrices.length + 1;
     setWholesalePrices((prev) => [...prev, { id: newId, qty: "", price: "" }]);
   };
 
@@ -230,7 +211,7 @@ const ProductDetail = () => {
     setLoading(true);
     const response = await getAProducts(id);
     if (response.status === "success") {
-      console.log(response.data);
+      setProductId(response.data._id);
       setFormData({
         productName: response.data.name,
         productCode: response.data.productCode,
@@ -242,9 +223,14 @@ const ProductDetail = () => {
         storeInventory: response.data.onSale ? "sellProduct" : "buyProduct",
         productType: response.data.onSale ? "inStock" : "outStock",
       });
-      setWholesalePrices(response.data.wholeSale);
+      setWholesalePrices(
+        response.data.wholeSale.map((w) => ({
+          id: w._id,
+          qty: w.wholeSaleQuantity,
+          price: w.wholeSaleUnitPrice,
+        }))
+      );
       setUploadedImages(response.data.images);
-      setProductId(response.data._id);
       setLoading(false);
     } else if (response.status === "error") {
       setLoading(false);
@@ -253,6 +239,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     getProduct();
+    getCategoryName();
   }, []);
 
   if (loading) {
@@ -267,7 +254,7 @@ const ProductDetail = () => {
           {formData.productName} Details
         </h1>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           className="p-1 hover:bg-gray-100 rounded-full"
         >
           <X className="w-5 h-5 text-gray-500" />
@@ -277,7 +264,7 @@ const ProductDetail = () => {
       <form onSubmit={handleSubmit} className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Product Information */}
-          <div className="lg:col-span-2 space-y-6 ">
+          <div className="lg:col-span-2 space-y-6">
             {/* Product Information Section */}
             <div className="border border-gray-200 shadow-md p-4 rounded">
               <h2 className="text-lg font-medium text-gray-900 mb-4">
@@ -294,7 +281,6 @@ const ProductDetail = () => {
                   name="productName"
                   value={formData.productName}
                   onChange={handleInputChange}
-                  readOnly
                   onBlur={handleBlur}
                   placeholder="Enter Product Name"
                   required
@@ -320,7 +306,6 @@ const ProductDetail = () => {
                     name="productCode"
                     value={formData.productCode}
                     onChange={handleInputChange}
-                    readOnly
                     onBlur={handleBlur}
                     placeholder="Enter Product Code"
                     required
@@ -343,7 +328,6 @@ const ProductDetail = () => {
                       type="number"
                       name="retailPrice"
                       value={formData.retailPrice}
-                      readOnly
                       onChange={handleInputChange}
                       onBlur={handleBlur}
                       placeholder="Enter Retail Price"
@@ -377,7 +361,6 @@ const ProductDetail = () => {
                       type="number"
                       name="totalQuantity"
                       value={formData.totalQuantity}
-                      readOnly
                       onChange={handleInputChange}
                       onBlur={handleBlur}
                       placeholder="Enter Quantity"
@@ -408,7 +391,6 @@ const ProductDetail = () => {
                       step="0.01"
                       name="weight"
                       value={formData.weight}
-                      readOnly
                       onChange={handleInputChange}
                       onBlur={handleBlur}
                       placeholder="Enter Weight"
@@ -437,7 +419,6 @@ const ProductDetail = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  readOnly
                   placeholder="Describe what this kind of product is"
                   rows={4}
                   required
@@ -459,82 +440,73 @@ const ProductDetail = () => {
                 Inventory
               </h2>
 
-              <div className="flex justify-between items-center">
-                {/* Product Type */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Product Type
+              {/* Product Type */}
+              <div className="mb-4 flex justify-between items-center">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Product Type
+                </label>
+                <div className="flex gap-6">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="productType"
+                      value="inStock"
+                      checked={formData.productType === "inStock"}
+                      onChange={handleInputChange}
+                      required
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">In Stock</span>
                   </label>
-                  <div className="flex gap-6">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="productType"
-                        value="inStock"
-                        readOnly
-                        checked={formData.productType === "inStock"}
-                        onChange={handleInputChange}
-                        required
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        In Stock
-                      </span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="productType"
-                        value="preOrder"
-                        readOnly
-                        checked={formData.productType === "preOrder"}
-                        onChange={handleInputChange}
-                        required
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        Pre Order
-                      </span>
-                    </label>
-                  </div>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="productType"
+                      value="preOrder"
+                      checked={formData.productType === "preOrder"}
+                      onChange={handleInputChange}
+                      required
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Pre Order
+                    </span>
+                  </label>
                 </div>
+              </div>
 
-                {/* Store in Inventory */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Store in Inventory
+              {/* Store in Inventory */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Store in Inventory
+                </label>
+                <div className="flex gap-6">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="storeInventory"
+                      value="sellProduct"
+                      checked={formData.storeInventory === "sellProduct"}
+                      onChange={handleInputChange}
+                      required
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Sell Product
+                    </span>
                   </label>
-                  <div className="flex gap-6">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="storeInventory"
-                        readOnly
-                        value="sellProduct"
-                        checked={formData.storeInventory === "sellProduct"}
-                        onChange={handleInputChange}
-                        required
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        Sell Product
-                      </span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="storeInventory"
-                        value="storeIn"
-                        checked={formData.storeInventory === "storeIn"}
-                        onChange={handleInputChange}
-                        required
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        Store In
-                      </span>
-                    </label>
-                  </div>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="storeInventory"
+                      value="storeIn"
+                      checked={formData.storeInventory === "storeIn"}
+                      onChange={handleInputChange}
+                      required
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Store In</span>
+                  </label>
                 </div>
               </div>
 
@@ -611,22 +583,39 @@ const ProductDetail = () => {
                 <h2 className="text-lg font-medium text-gray-900">
                   Wholesale Pricing
                 </h2>
+
+                <button
+                  type="button"
+                  onClick={addWholesalePrice}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Wholesale Price
+                </button>
               </div>
 
               <div className="space-y-4">
                 {wholesalePrices.map((wholesale, index) => (
                   <div
-                    key={wholesale._id}
+                    key={index}
                     className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg relative"
                   >
+                    {wholesalePrices.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeWholesalePrice(wholesale.id)}
+                        className="absolute top-2 right-2 p-1 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Wholesale Qty - {index + 1}
                       </label>
                       <input
                         type="number"
-                        value={wholesale.wholeSaleQuantity}
-                        readOnly
+                        value={wholesale.qty}
                         onChange={(e) =>
                           handleWholesaleChange(
                             wholesale.id,
@@ -645,8 +634,7 @@ const ProductDetail = () => {
                       <div className="relative">
                         <input
                           type="number"
-                          value={wholesale.wholeSaleUnitPrice}
-                          readOnly
+                          value={wholesale.price}
                           onChange={(e) =>
                             handleWholesaleChange(
                               wholesale.id,
@@ -717,18 +705,14 @@ const ProductDetail = () => {
         {/* Bottom Buttons */}
         <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
           <button
-            onClick={() => deleteProduct(porductId)}
             type="button"
-            className="button bg-danger text-red-500"
+            onClick={() => navigate(-1)}
+            className="button border border-primary text-primary"
           >
-            <span className="text-[14px]">Delete</span>
+            <span className="text-[14px]">Cancel</span>
           </button>
-          <button
-            onClick={() => navigate(`/product-edit/${formData.productCode}`)}
-            className="button bg-primary text-white"
-          >
-            <MdOutlineEdit className="w-4 h-4" />
-            <span className="text-[14px]">Edit Product</span>
+          <button type="submit" className="button bg-primary text-white">
+            <span className="text-[14px]">Confirm Edit</span>
           </button>
         </div>
       </form>

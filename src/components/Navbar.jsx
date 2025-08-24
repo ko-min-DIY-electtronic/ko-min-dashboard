@@ -16,14 +16,6 @@ import {
 import logo from "../assets/uedc.png";
 import { useContext } from "react";
 import { NumberContext } from "../context/NumberContext";
-import getAllOrders from "../api/orderApi/getAllOrders";
-import io from "socket.io-client";
-import getAllTickets from "../api/support/GetAllTicket";
-
-const socket = io.connect(import.meta.env.VITE_APP_API, {
-  transports: ["websocket"],
-  secure: true,
-});
 
 function Navbar() {
   const username = JSON.parse(localStorage.getItem("uedc-user"))?.name;
@@ -84,43 +76,26 @@ function Navbar() {
     window.location.href = "/login";
   };
 
-  const getNewOrderCount = async () => {
-    const response = await getAllOrders("pending");
-    if (response.code === 200) {
-      // setOrders(response.data);
-      // console.log(response.totalCount);
-      setNewOrderCount(response.totalCount);
-    }
-  };
+  // useEffect(() => {
+  //   getNewOrderCount();
+  //   getMessageCount();
 
-  const getMessageCount = async () => {
-    const response = await getAllTickets();
-    const haveUnseen = response.data.filter((t) => !t.hasSeen && !t.hasSolved);
-    setMessageCount(haveUnseen.length);
-    // console.log("haveUnseen", haveUnseen);
-    // console.log("messageCount in Function", messageCount);
-  };
+  //   if (role !== "inventory" && role !== "delivery") {
+  //     socket.on("orderFinalized", (data) => {
+  //       // console.log("data", data);
+  //       if (data.snapshotData.deliveryStatus === "pending") {
+  //         setNewOrderCount((prev) => prev + 1);
+  //       }
+  //     });
+  //   }
 
-  useEffect(() => {
-    getNewOrderCount();
-    getMessageCount();
-
-    if (role !== "inventory" && role !== "delivery") {
-      socket.on("orderFinalized", (data) => {
-        // console.log("data", data);
-        if (data.snapshotData.deliveryStatus === "pending") {
-          setNewOrderCount((prev) => prev + 1);
-        }
-      });
-    }
-
-    if (role === "customer-support" || role === "admin") {
-      socket.on("newCustomerSupportTicket", (data) => {
-        // console.log("messageCount", messageCount);
-        setMessageCount((prev) => prev + 1);
-      });
-    }
-  }, []);
+  //   if (role === "customer-support" || role === "admin") {
+  //     socket.on("newCustomerSupportTicket", (data) => {
+  //       // console.log("messageCount", messageCount);
+  //       setMessageCount((prev) => prev + 1);
+  //     });
+  //   }
+  // }, []);
 
   // console.log("messageCount", messageCount);
 
@@ -173,7 +148,7 @@ function Navbar() {
                         flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                         ${
                           isActive(item.path)
-                            ? "bg-orange-500 text-white shadow-lg"
+                            ? "bg-primary text-white shadow-lg"
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                         }
                     `}
@@ -258,7 +233,7 @@ function Navbar() {
                         flex items-center px-3 py-3 rounded-lg transition-all duration-300 relative group
                         ${
                           isActive(item.path)
-                            ? "bg-orange-500 text-white shadow-lg "
+                            ? "bg-primary text-white shadow-lg "
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                         }
  

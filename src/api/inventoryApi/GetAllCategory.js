@@ -1,9 +1,8 @@
 import axios from "../../axios";
 
-const getAProducts = async (id) => {
+const getAllCategory = async () => {
   try {
-    const response = await axios.get(`stocks/${id}`);
-
+    const response = await axios.get("stocks/overviews");
     return response.data;
   } catch (error) {
     console.log(error);
@@ -11,4 +10,4 @@ const getAProducts = async (id) => {
   }
 };
 
-export default getAProducts;
+export default getAllCategory;

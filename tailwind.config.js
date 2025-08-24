@@ -9,13 +9,15 @@ export default {
         squada: ['"Squada One"', "sans-serif"],
       },
       colors: {
-        primary: "#E95900", // Custom primary color
-        secondary: "#121212", // Custom secondary color
-        accent: "#FBBF24", // Custom accent color
-        active: "#00FF00",
-        expired: "#FF0000",
-        pending: "#FFFF00",
-        delete: "#E60000",
+        primary: "#1E1E1E", // Custom primary color
+        success: "#CFF7D3", // Custom secondary color
+        successText: "#02542D",
+        warning: "#FFF1C2",
+        warningText: "#401B01",
+        danger: "#FDD3D0",
+        dangerText: "#900B09",
+        info: "#900B09",
+        infoText: "#000080",
         // Add more custom colors as needed
       },
     },

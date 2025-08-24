@@ -19,9 +19,9 @@ export default function App() {
           <Route
             path="*"
             element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
+              // <PrivateRoute>
+              <Home />
+              // </PrivateRoute>
             }
           />
         </Routes>

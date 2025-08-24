@@ -1,10 +1,10 @@
 import axios from "../../axios";
 import { toast } from "sonner";
 
-const updateProduct = async ({ id, data }) => {
+const updateProduct = async ({ productId, data }) => {
   const toastId = toast.loading("Updating product...");
   try {
-    const response = await axios.patch(`api/v1/stock/${id}`, data);
+    const response = await axios.patch(`stocks/detail/${productId}`, data);
     if (response.status === 200) {
       toast.success("Product updated successfully!", {
         id: toastId,

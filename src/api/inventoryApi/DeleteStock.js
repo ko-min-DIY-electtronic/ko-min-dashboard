@@ -1,10 +1,10 @@
 import axios from "../../axios";
 import { toast } from "sonner";
 
-const deleteStock = async (id) => {
+const deleteStock = async (productId) => {
   const toastId = toast.loading("Deleting product...");
   try {
-    const response = await axios.patch(`api/v1/stock/soft-delete/${id}`);
+    const response = await axios.patch(`stocks/${productId}`);
     if (response.status === 200) {
       toast.success("Product deleted successfully!", {
         id: toastId,
