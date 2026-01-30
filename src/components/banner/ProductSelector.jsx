@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Search, Package, Check, ChevronDown } from "lucide-react";
+import { Search, Package, Check, ChevronDown, X } from "lucide-react";
 import getAllProducts from "../../api/inventoryApi/getAllProductsForSelect";
 
-const ProductSelector = ({ selectedProduct, onProductSelect, error }) => {
+const ProductSelector = ({ selectedProducts, onProductSelect, error }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [allProducts, setAllProducts] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -35,13 +35,13 @@ const ProductSelector = ({ selectedProduct, onProductSelect, error }) => {
           product.productCode
             .toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchQuery.toLowerCase())
+          product.category.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : allProducts; // Show all products when no search query
 
   const handleProductSelect = (product) => {
     onProductSelect(product);
-    setSearchQuery(product.name);
+    // Don't clear search query for multi-select
     setIsDropdownOpen(false);
   };
 
@@ -62,7 +62,7 @@ const ProductSelector = ({ selectedProduct, onProductSelect, error }) => {
   return (
     <div className="relative">
       <label className="block text-sm font-medium text-gray-700 mb-2">
-        Featured Product
+        Featured Products
       </label>
 
       <div className="relative">
@@ -103,31 +103,42 @@ const ProductSelector = ({ selectedProduct, onProductSelect, error }) => {
 
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
 
-      {/* Selected Product Display */}
-      {selectedProduct && (
-        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  {selectedProduct.name}
-                </p>
-                <p className="text-xs text-gray-600">
-                  Code: {selectedProduct.productCode}
-                </p>
-                <p className="text-xs text-gray-500">
-                  Price: {selectedProduct.retailUnitPrice} MMK | Stock:{" "}
-                  {selectedProduct.stockQuantity}
-                </p>
+      {/* Selected Products Display */}
+      {selectedProducts && selectedProducts.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {selectedProducts.map((product) => (
+            <div
+              key={product._id}
+              className="p-3 bg-green-50 border border-green-200 rounded-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Package className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {product.name}
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      Code: {product.productCode}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Price: {product.retailUnitPrice} MMK | Stock:{" "}
+                      {product.stockQuantity}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onProductSelect(product)}
+                  className="flex items-center text-red-500 hover:text-red-700"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             </div>
-            <div className="flex items-center text-green-600">
-              <Check className="w-4 h-4" />
-            </div>
-          </div>
+          ))}
         </div>
       )}
 
@@ -142,22 +153,29 @@ const ProductSelector = ({ selectedProduct, onProductSelect, error }) => {
                 onClick={() => handleProductSelect(product)}
                 className="w-full px-4 py-3 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Package className="w-4 h-4 text-gray-600" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <Package className="w-4 h-4 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {product.name}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Code: {product.productCode} | Category:{" "}
+                        {product.category}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Price: {product.retailUnitPrice} MMK | Stock:{" "}
+                        {product.stockQuantity}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {product.name}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Code: {product.productCode} | Category: {product.category}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Price: {product.retailUnitPrice} MMK | Stock:{" "}
-                      {product.stockQuantity}
-                    </p>
-                  </div>
+                  {selectedProducts &&
+                    selectedProducts.find((p) => p._id === product._id) && (
+                      <Check className="w-4 h-4 text-green-600" />
+                    )}
                 </div>
               </button>
             ))

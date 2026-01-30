@@ -42,6 +42,13 @@ function Navbar() {
       secondaryPath: "product",
     },
     {
+      path: "/banners",
+      icon: Image,
+      label: "Banners",
+      role: "admin",
+      secondaryRole: "admin",
+    },
+    {
       path: "/orders",
       icon: ShoppingCart,
       label: "Order",
@@ -56,13 +63,13 @@ function Navbar() {
       role: "delivery",
       secondaryRole: "customer-support",
     },
-    {
-      path: "/chat",
-      icon: MessageCircle,
-      label: "Chat",
-      role: "customer-support",
-      secondaryRole: "admin",
-    },
+    // {
+    //   path: "/chat",
+    //   icon: MessageCircle,
+    //   label: "Chat",
+    //   role: "customer-support",
+    //   secondaryRole: "admin",
+    // },
     {
       path: "/sales-report",
       icon: BarChart3,
@@ -81,13 +88,6 @@ function Navbar() {
       path: "/accounts",
       icon: Shield,
       label: "Admin Accounts",
-      role: "admin",
-      secondaryRole: "admin",
-    },
-    {
-      path: "/banners",
-      icon: Image,
-      label: "Banners",
       role: "admin",
       secondaryRole: "admin",
     },
