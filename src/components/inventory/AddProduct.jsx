@@ -82,7 +82,7 @@ const ProductForm = () => {
     if (response.success) {
       console.log(response.data);
       setCategoryOptions(
-        response.data.items.map((category) => category.category)
+        response.data.items.map((category) => category.category),
       );
       // setCategory(response.data);
       // setLoading(false);
@@ -165,21 +165,28 @@ const ProductForm = () => {
     data.append("category", formData.productCategory);
     data.append(
       "onSale",
-      formData.storeInventory === "sellProduct" ? true : false
+      formData.storeInventory === "sellProduct" ? true : false,
     );
     if (uploadedImages.length > 0) {
       uploadedImages.forEach((img) => {
         data.append("images", img.file);
       });
     }
-    wholesalePrices.forEach((price, index) => {
+    const validWholesalePrices = wholesalePrices.filter(
+      (price) =>
+        price.qty &&
+        price.price &&
+        price.qty.toString().trim() !== "" &&
+        price.price.toString().trim() !== "",
+    );
+    console.log("validWholesalePrices", validWholesalePrices);
+    validWholesalePrices.forEach((price, index) => {
       data.append(`wholeSale[${index}][wholeSaleQuantity]`, price.qty);
       data.append(`wholeSale[${index}][wholeSaleUnitPrice]`, price.price);
     });
     // console.log(data);
 
     const res = await addProduct(data);
-    console.log(res);
     if (res.success) {
       navigate("/");
     }
@@ -198,7 +205,7 @@ const ProductForm = () => {
 
   const handleWholesaleChange = (id, field, value) => {
     setWholesalePrices((prev) =>
-      prev.map((w) => (w.id === id ? { ...w, [field]: value } : w))
+      prev.map((w) => (w.id === id ? { ...w, [field]: value } : w)),
     );
   };
 
@@ -211,7 +218,7 @@ const ProductForm = () => {
   };
 
   const filteredCategories = categoryOptions.filter((category) =>
-    category.toLowerCase().includes(formData.productCategory.toLowerCase())
+    category.toLowerCase().includes(formData.productCategory.toLowerCase()),
   );
 
   useEffect(() => {
@@ -596,7 +603,7 @@ const ProductForm = () => {
                           handleWholesaleChange(
                             wholesale.id,
                             "qty",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder="Eg - 10"
@@ -615,7 +622,7 @@ const ProductForm = () => {
                             handleWholesaleChange(
                               wholesale.id,
                               "price",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           placeholder="Eg - 55000"
