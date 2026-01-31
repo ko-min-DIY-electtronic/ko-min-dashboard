@@ -23,7 +23,7 @@ const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
 
     // Update select all state based on current selection
     setSelectAll(
-      newSelectedRows.size === category.length && category.length > 0
+      newSelectedRows.size === category.length && category.length > 0,
     );
   };
 
@@ -87,14 +87,14 @@ const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
             style={{ position: "sticky", top: 0 }}
           >
             <tr>
-              <th className="px-4 py-4 text-left">
+              {/* <th className="px-4 py-4 text-left">
                 <input
                   type="checkbox"
                   checked={selectAll}
                   onChange={handleSelectAll}
                   className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:none"
                 />
-              </th>
+              </th> */}
               <th className="px-4 py-4 text-left text-xs font-black uppercase tracking-wider">
                 No
               </th>
@@ -139,14 +139,14 @@ const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
                           selectedRows.has(product.category) ? "bg-blue-50" : ""
                         }
                       >
-                        <td className="px-4 py-4 whitespace-nowrap">
+                        {/* <td className="px-4 py-4 whitespace-nowrap">
                           <input
                             type="checkbox"
                             checked={selectedRows.has(product.category)}
                             onChange={() => handleRowSelect(product.category)}
                             className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:none"
                           />
-                        </td>
+                        </td> */}
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                           {index + 1}
                         </td>
@@ -208,7 +208,7 @@ const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
                         </td>
                       </tr>
                     )
-                  )
+                  ),
                 )}
               {category.length === 0 && (
                 <tr>
