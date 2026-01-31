@@ -14,6 +14,7 @@ import UserManagement from "./UserManagement";
 import UserDetail from "./UserDetail";
 import Accounts from "../components/accounts/Accounts";
 import Banner from "../components/banner/Banner";
+import BannerDetail from "../components/banner/BannerDetail";
 import CreateBanner from "../components/banner/CreateBanner";
 import Chat from "./Chat";
 import ChatDetailPage from "./ChatDetail";
@@ -37,6 +38,7 @@ function Home() {
             <Route path="/user/:id" element={<UserDetail />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/banners" element={<Banner />} />
+            <Route path="/banners/:bannerId" element={<BannerDetail />} />
             <Route path="/banners/create" element={<CreateBanner />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/:id" element={<ChatDetailPage />} />

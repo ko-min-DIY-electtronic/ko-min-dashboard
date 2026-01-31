@@ -33,9 +33,9 @@ export default function UserManagement() {
 
   const tabs = [
     "All Users",
-    "Verified Users",
-    "Unverified Users",
-    "Banned Users",
+    // "Verified Users",
+    // "Unverified Users",
+    // "Banned Users",
   ];
 
   const filteredUsers = users.filter((user) => {
@@ -136,7 +136,7 @@ export default function UserManagement() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto w-full h-[calc(100vh-220px)]">
+        <div className=" overflow-x-auto bg-white rounded-lg shadow overflow-y-auto w-full h-[calc(100vh-220px)]">
           <table className="w-full table-auto">
             <thead
               className="bg-gray-50 border-b border-gray-200"
@@ -155,12 +155,12 @@ export default function UserManagement() {
                 <th className="px-4 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
+                {/* <th className="px-4 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-4 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Last Active
-                </th>
+                </th> */}
                 <th className="px-4 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Joined Date
                 </th>
@@ -194,12 +194,12 @@ export default function UserManagement() {
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       {getRoleBadge(user.role)}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {/* <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       {getStatusBadge(user)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    </td> */}
+                    {/* <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatDate(user.lastActiveAt)}
-                    </td>
+                    </td> */}
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatDate(user.createdAt)}
                     </td>
@@ -214,7 +214,7 @@ export default function UserManagement() {
                           View
                         </button>
 
-                        {user.isBanned ? (
+                        {/* {user.isBanned ? (
                           <button
                             className="flex items-center px-3 py-1 text-xs border border-green-500 text-green-500 rounded-lg hover:bg-green-500 hover:text-white transition-colors"
                             title="Unban User"
@@ -230,7 +230,7 @@ export default function UserManagement() {
                             <ShieldOff className="w-3 h-3 mr-1" />
                             Ban
                           </button>
-                        )}
+                        )} */}
                       </div>
                     </td>
                   </tr>

@@ -37,10 +37,10 @@ const OrderTable = ({
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState(
-    sessionStorage.getItem("startDate") || startOfDay(today)
+    sessionStorage.getItem("startDate") || startOfDay(today),
   );
   const [endDate, setEndDate] = useState(
-    sessionStorage.getItem("endDate") || endOfDay(today)
+    sessionStorage.getItem("endDate") || endOfDay(today),
   );
 
   const handleDateRangeChange = (ranges) => {
@@ -156,7 +156,7 @@ const OrderTable = ({
       )}
 
       {/* Table */}
-      <div className="w-[calc(100vw-70px)] lg:w-auto overflow-x-auto bg-white mt-[50px] rounded-lg shadow overflow-y-auto h-[calc(100vh-230px)]">
+      <div className="w-[calc(100vw-70px)] lg:w-auto overflow-x-auto bg-white rounded-lg shadow overflow-y-auto h-[calc(100vh-230px)]">
         <table className="w-full table-auto">
           <thead
             className="bg-gray-50 border-b border-gray-200"

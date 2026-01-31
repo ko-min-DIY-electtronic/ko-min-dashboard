@@ -11,6 +11,7 @@ import "react-date-range/dist/theme/default.css"; // theme css file
 import SearchBar from "../utli/SearchBar";
 import searchOrder from "../../api/orderApi/SearchOrder";
 import { startOfDay, endOfDay } from "date-fns";
+import Loading from "../utli/Loading";
 // const socket = io.connect(import.meta.env.VITE_APP_API, {
 //   transports: ["websocket"],
 //   secure: true,
@@ -21,10 +22,10 @@ function GetAllOrder() {
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState(
-    sessionStorage.getItem("startDate") || startOfDay(today)
+    sessionStorage.getItem("startDate") || startOfDay(today),
   );
   const [endDate, setEndDate] = useState(
-    sessionStorage.getItem("endDate") || endOfDay(today)
+    sessionStorage.getItem("endDate") || endOfDay(today),
   );
 
   const handleDateRangeChange = (ranges) => {
@@ -65,7 +66,7 @@ function GetAllOrder() {
     if (response.success) {
       console.log(response);
       setOrders(response.data.orders);
-      setLoading(false);
+      setTimeout(() => setLoading(false), 500);
     } else if (response.success === false) {
       navigate("/unauthorized");
     }
@@ -146,23 +147,26 @@ function GetAllOrder() {
   //   };
   // }, []);
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <div className="px-4">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between ">
         <h1 className="header">Order Management</h1>
 
-        <div className="flex items-center justify-between gap-10 mt-5 lg:mt-0">
+        {/* <div className="flex items-center justify-between gap-10 mt-5 lg:mt-0">
           <div className="w-auto md:w-[400px]">
-            {/* <SearchBar
-                onSearch={(name) => (!name ? getOrders() : null)}
-                placeholder="Search Customer Name"
-                onClick={searchFunction}
-              /> */}
+            <SearchBar
+              onSearch={(name) => (!name ? getOrders() : null)}
+              placeholder="Search Customer Name"
+              onClick={searchFunction}
+            />
           </div>
-          {/* <button
+          <button
             onClick={() => {
               setShowDatePicker(!showDatePicker);
-              // console.log(showDatePicker);
             }}
             className="button button-color text-color border border-primary transition-all duration-300 w-auto"
           >
@@ -171,13 +175,12 @@ function GetAllOrder() {
               ? format(startDate, "dd-MM-yyyy")
               : `${format(startDate, "dd-MM-yyyy")} - ${format(
                   endDate,
-                  "dd-MM-yyyy"
+                  "dd-MM-yyyy",
                 )}`}
-          </button> */}
-        </div>
+          </button>
+        </div> */}
       </div>
 
-      {/* Date Range Picker */}
       {/* {showDatePicker && (
         <div className="mb-4 bg-white rounded-lg shadow-md absolute right-0 z-10">
           <DateRange

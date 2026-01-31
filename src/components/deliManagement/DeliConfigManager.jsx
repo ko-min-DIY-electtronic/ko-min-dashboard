@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { createDeliveryConfig } from "./../../types/delivery";
 import { DeliveryConfigForm } from "./DeliConfigForm";
 import { DeliveryConfigCard } from "./DeliConfigCard";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, ChevronDown } from "lucide-react";
 import getAllDeliverZone from "../../api/deliveryApi/getAllDeliZone";
 
 export const DeliveryConfigManager = () => {
   const [configs, setConfigs] = useState([]);
+  const [expandedCity, setExpandedCity] = useState(null); // Track which city is expanded
 
   const [showForm, setShowForm] = useState(false);
   const [editingConfig, setEditingConfig] = useState(null);
@@ -43,8 +44,8 @@ export const DeliveryConfigManager = () => {
       prev.map((config) =>
         config.id === editingConfig?.id
           ? { ...updatedConfig, id: config.id }
-          : config
-      )
+          : config,
+      ),
     );
     setEditingConfig(null);
   };
@@ -72,6 +73,23 @@ export const DeliveryConfigManager = () => {
       filterReachable === null || config.reachable === filterReachable;
     return matchesSearch && matchesFilter;
   });
+
+  // Group configurations by city
+  const groupedConfigs = filteredConfigs.reduce((groups, config) => {
+    const city = config.city;
+    if (!groups[city]) {
+      groups[city] = [];
+    }
+    groups[city].push(config);
+    return groups;
+  }, {});
+
+  // Sort cities alphabetically
+  const sortedCities = Object.keys(groupedConfigs).sort();
+
+  const toggleCity = (city) => {
+    setExpandedCity(expandedCity === city ? null : city);
+  };
 
   return (
     <div className="px-4">
@@ -153,22 +171,66 @@ export const DeliveryConfigManager = () => {
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-gray-600">
-            Showing{" "}
-            <span className="font-semibold">{filteredConfigs.length}</span> of{" "}
-            <span className="font-semibold">{configs.length}</span>{" "}
+            Showing <span className="font-semibold">{sortedCities.length}</span>{" "}
+            cities with{" "}
+            <span className="font-semibold">{filteredConfigs.length}</span>{" "}
             configurations
           </p>
         </div>
 
-        {/* Config Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredConfigs.map((config) => (
-            <DeliveryConfigCard
-              key={config._id}
-              config={config}
-              onEdit={handleEditConfig}
-              onDelete={handleDeleteConfig}
-            />
+        {/* Config Cards Grouped by City */}
+        <div className="space-y-4">
+          {sortedCities.map((city) => (
+            <div
+              key={city}
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden"
+            >
+              {/* City Header - Clickable Bar */}
+              <div
+                onClick={() => toggleCity(city)}
+                className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200 cursor-pointer hover:from-blue-100 hover:to-indigo-100 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      {city}
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      ({groupedConfigs[city].length} configuration
+                      {groupedConfigs[city].length !== 1 ? "s" : ""})
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Active
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
+                        expandedCity === city ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* City Configurations - Collapsible */}
+              {expandedCity === city && (
+                <div className="p-6 border-t border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {groupedConfigs[city].map((config) => (
+                      <DeliveryConfigCard
+                        key={config._id}
+                        config={config}
+                        onEdit={handleEditConfig}
+                        onDelete={handleDeleteConfig}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 

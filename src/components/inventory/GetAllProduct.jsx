@@ -20,7 +20,7 @@ function GetAllProduct() {
     console.log("response", response);
     if (response.success) {
       const filterDelete = response.data.filter(
-        (product) => product.isDeleted === false
+        (product) => product.isDeleted === false,
       );
       setProducts(filterDelete);
       setLoading(false);

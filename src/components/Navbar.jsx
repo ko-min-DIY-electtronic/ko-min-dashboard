@@ -70,13 +70,13 @@ function Navbar() {
     //   role: "customer-support",
     //   secondaryRole: "admin",
     // },
-    {
-      path: "/sales-report",
-      icon: BarChart3,
-      label: "Sales Report",
-      role: "finance",
-      secondaryRole: "admin",
-    },
+    // {
+    //   path: "/sales-report",
+    //   icon: BarChart3,
+    //   label: "Sales Report",
+    //   role: "finance",
+    //   secondaryRole: "admin",
+    // },
     {
       path: "/users",
       icon: Users,

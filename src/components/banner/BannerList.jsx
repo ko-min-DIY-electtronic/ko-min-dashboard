@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MdArrowBackIosNew, MdArrowForwardIos } from "react-icons/md";
 import BannerCard from "./BannerCard";
 
-const BannerList = ({ banners, loading }) => {
+const BannerList = ({ banners, loading, onBannerUpdate }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -63,45 +63,9 @@ const BannerList = ({ banners, loading }) => {
       {/* View Controls */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                viewMode === "grid"
-                  ? "bg-white text-primary shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Grid
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                viewMode === "list"
-                  ? "bg-white text-primary shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              List
-            </button>
-          </div>
-
           <span className="text-sm text-gray-600">
             {banners.length} banner{banners.length !== 1 ? "s" : ""} found
           </span>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-700">Show</span>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value={12}>12</option>
-            <option value={24}>24</option>
-            <option value={48}>48</option>
-          </select>
         </div>
       </div>
 
@@ -118,6 +82,7 @@ const BannerList = ({ banners, loading }) => {
             key={banner._id}
             banner={banner}
             index={startIndex + index}
+            onBannerUpdate={onBannerUpdate}
           />
         ))}
       </div>

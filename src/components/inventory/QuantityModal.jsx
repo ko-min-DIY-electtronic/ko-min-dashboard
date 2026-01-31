@@ -56,12 +56,14 @@ const QuantityModal = ({ isOpen, onClose, cancel, product }) => {
       id: product.productCode,
       data: { quantityChange: method === "add" ? newQuantity : -newQuantity },
     });
-    // console.log(res);
-    if (res.code === 200) {
+    console.log(res);
+    if (res.success) {
       onClose();
       setMethod(null);
       setNewQuantity(0);
       // onSubmit();
+    } else if (res.success === false) {
+      toast.error(res.message);
     }
   };
 

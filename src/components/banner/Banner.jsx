@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BannerList from "./BannerList";
 import getAllBanners from "../../api/bannerApi/getAllBanners";
+import Loading from "../utli/Loading";
 
 function Banner() {
   const navigate = useNavigate();
@@ -25,13 +26,17 @@ function Banner() {
       console.error("Error fetching banners:", err);
       setError("An error occurred while fetching banners");
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 500);
     }
   };
 
   useEffect(() => {
     fetchBanners();
   }, []);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="w-full px-4">
@@ -99,7 +104,11 @@ function Banner() {
       )}
 
       {/* Banner List */}
-      <BannerList banners={banners} loading={loading} />
+      <BannerList
+        banners={banners}
+        loading={loading}
+        onBannerUpdate={fetchBanners}
+      />
     </div>
   );
 }
