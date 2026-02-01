@@ -228,8 +228,8 @@ const ProductForm = () => {
   return (
     <div className="mx-auto h-[calc(100vh-4px)] overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200">
-        <h1 className="text-xl font-semibold text-gray-900">
+      <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+        <h1 className="ml-8 lg:ml-0 text-xl font-semibold text-gray-900">
           Create New Product
         </h1>
         <button
@@ -573,7 +573,7 @@ const ProductForm = () => {
                   className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  Add Wholesale Price
+                  Add <span className="hidden sm:inline">Wholesale Price</span>
                 </button>
               </div>
 

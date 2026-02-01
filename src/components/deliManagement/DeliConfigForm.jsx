@@ -11,7 +11,7 @@ export const DeliveryConfigForm = ({
   refetch,
 }) => {
   const [formData, setFormData] = useState(() =>
-    createDeliveryConfig(initialData)
+    createDeliveryConfig(initialData),
   );
 
   const [errors, setErrors] = useState(createFormErrors());
@@ -73,7 +73,7 @@ export const DeliveryConfigForm = ({
         <div className="p-2 bg-blue-100 rounded-lg">
           <Plus className="w-6 h-6 text-blue-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-800">
           {isEditing
             ? "Edit Delivery Configuration"
             : "Add New Delivery Configuration"}
@@ -144,7 +144,7 @@ export const DeliveryConfigForm = ({
             >
               Delivery Fee *
             </label>
-            <div className="relative flex items-center gap-2">
+            <div className="relative flex items-center gap-2 border border-gray-300 rounded-lg ">
               <input
                 type="number"
                 id="deliveryFee"
@@ -154,14 +154,14 @@ export const DeliveryConfigForm = ({
                 onChange={(e) =>
                   handleInputChange("deliveryFee", Number(e.target.value))
                 }
-                className={`w-full pl-8 pr-4 py-3 border rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full pl-8 pr-4 py-3 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.deliveryFee
                     ? "border-red-300 bg-red-50"
                     : "border-gray-300 hover:border-gray-400"
                 }`}
                 placeholder="0.00"
               />
-              <span className="left-3 top-3 text-gray-500 font-medium">
+              <span className="left-3 top-3 text-gray-500 font-medium me-2">
                 MMK
               </span>
             </div>
@@ -180,7 +180,7 @@ export const DeliveryConfigForm = ({
             >
               Additional Weight Charge
             </label>
-            <div className="relative flex items-center gap-2">
+            <div className="relative flex items-center gap-2 border border-gray-300 rounded-lg ">
               <input
                 type="number"
                 id="additionalWeightCharge"
@@ -190,13 +190,13 @@ export const DeliveryConfigForm = ({
                 onChange={(e) =>
                   handleInputChange(
                     "additionalWeightCharge",
-                    Number(e.target.value)
+                    Number(e.target.value),
                   )
                 }
-                className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg font-medium transition-colors hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-8 pr-4 py-3 font-medium transition-colors hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0.00"
               />
-              <span className="left-3 top-3 text-gray-500 font-medium">
+              <span className="left-3 top-3 text-gray-500 font-medium me-2">
                 MMK
               </span>
             </div>
@@ -242,11 +242,7 @@ export const DeliveryConfigForm = ({
             className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" />
-            {isSubmitting
-              ? "Saving..."
-              : isEditing
-              ? "Update Configuration"
-              : "Add Configuration"}
+            {isSubmitting ? "Saving..." : isEditing ? "Update" : "Add"}
           </button>
 
           {onCancel && (
