@@ -17,6 +17,15 @@ const AccountTable = ({ users, refetch }) => {
     refetch();
   };
 
+  const truncateName = (name, wordLimit = 8) => {
+    console.log(name);
+    if (!name) return "";
+    const words = name.slice(0, wordLimit);
+    console.log(words);
+    if (words.length <= wordLimit) return name;
+    return words.slice(0, wordLimit).join(" ") + "...";
+  };
+
   const tabs = ["Admin", "Staff"];
 
   const filterUsers = () => {
@@ -57,7 +66,7 @@ const AccountTable = ({ users, refetch }) => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto h-[calc(100vh-220px)]">
+      <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto w-[calc(100vw-70px)] lg:w-auto h-[calc(100vh-220px)]">
         <table className="w-full table-auto">
           <thead
             className="bg-gray-50 border-b border-gray-200"
@@ -88,8 +97,8 @@ const AccountTable = ({ users, refetch }) => {
                   {/* <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {index + 1}
                   </td> */}
-                  <td className="px-4 py-4 whitespace-nowrap  text-sm text-gray-900 col-span-1">
-                    {user?.name}
+                  <td className="truncate w-[100px] sm:w-auto px-4 py-4 whitespace-nowrap  text-sm text-gray-900 col-span-1">
+                    <span className="">{user?.name}</span>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 col-span-1">
                     <p className="flex items-center space-x-2">
@@ -175,7 +184,7 @@ const AccountTable = ({ users, refetch }) => {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between mt-6">
+      {/* <div className="flex items-center justify-between mt-6">
         <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-700">View</span>
           <select
@@ -238,7 +247,7 @@ const AccountTable = ({ users, refetch }) => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <AccUpdateModel
         isOpen={isOpen}

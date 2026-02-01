@@ -125,7 +125,7 @@ const BannerDetail = () => {
   }
 
   return (
-    <div className="w-full px-4 py-6">
+    <div className="w-full px-4 py-6 overflow-y-auto h-[calc(100vh-10px)]">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -144,7 +144,7 @@ const BannerDetail = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Banner Information */}
         <div className="lg:col-span-2 space-y-6">
           {/* Banner Image and Basic Info */}
@@ -233,9 +233,9 @@ const BannerDetail = () => {
                     key={stock._id}
                     className="border border-gray-200 rounded-lg p-4"
                   >
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       {/* Product Image */}
-                      <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="w-full sm:w-20 h-full sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                         {stock.images && stock.images.length > 0 ? (
                           <img
                             src={stock.images[0].url}
@@ -317,9 +317,9 @@ const BannerDetail = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="lg:col-span-1">
-          {/* Additional Info */}
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+        {/* <div className="lg:col-span-1"> */}
+        {/* Additional Info */}
+        {/* <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Additional Information
             </h3>
@@ -357,8 +357,8 @@ const BannerDetail = () => {
                 </p>
               </div>
             </div>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
       </div>
     </div>
   );

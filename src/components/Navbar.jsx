@@ -149,7 +149,7 @@ function Navbar() {
       {/* Mobile Sidebar */}
       <div
         className={`
-        lg:hidden fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-40 transform transition-transform duration-300 ease-in-out
+        lg:hidden fixed left-0 top-0 h-[calc(100vh-55px)] w-64 bg-white border-r border-gray-200 z-40 transform transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >

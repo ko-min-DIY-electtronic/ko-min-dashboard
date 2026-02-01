@@ -156,7 +156,7 @@ const OrderTable = ({
       )}
 
       {/* Table */}
-      <div className="w-[calc(100vw-70px)] lg:w-auto overflow-x-auto bg-white rounded-lg shadow overflow-y-auto h-[calc(100vh-230px)]">
+      <div className="w-[calc(100vw-70px)] lg:w-auto overflow-x-auto bg-white rounded-lg shadow overflow-y-auto h-[calc(100vh-100px)]">
         <table className="w-full table-auto">
           <thead
             className="bg-gray-50 border-b border-gray-200"

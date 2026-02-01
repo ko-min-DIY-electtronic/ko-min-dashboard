@@ -95,16 +95,16 @@ export const DeliveryConfigManager = () => {
     <div className="px-4">
       <div className="overflow-y-auto h-[calc(100vh-50px)]">
         {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-2">
+        <div className="md:mb-8 mb-2 flex flex-col md:flex-row items-center justify-between gap-10 md:gap-2">
           <div className="">
             <h1 className="header ml-8 lg:ml-0">Delivery Configuration</h1>
-            <p className="text-gray-600">
+            <p className="hidden md:block text-gray-600">
               Manage delivery pricing for different locations
             </p>
           </div>
 
           {/* Search */}
-          <div className="flex flex-col md:flex-row md:items-center gap-2">
+          <div className="flex flex-row md:items-center gap-2">
             <div className="relative  md:w-[400px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -123,7 +123,7 @@ export const DeliveryConfigManager = () => {
               className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none transition-colors"
             >
               <Plus className="w-5 h-5" />
-              Add New Configuration
+              <span className="hidden md:block">Add New Configuration</span>
             </button>
           </div>
         </div>
@@ -193,16 +193,15 @@ export const DeliveryConfigManager = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <h2 className="text-xl font-semibold text-gray-900">
+                    <h2 className="text-md md:text-xl font-semibold text-gray-900">
                       {city}
                     </h2>
                     <p className="text-sm text-gray-600">
-                      ({groupedConfigs[city].length} configuration
-                      {groupedConfigs[city].length !== 1 ? "s" : ""})
+                      {groupedConfigs[city].length}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       Active
                     </div>

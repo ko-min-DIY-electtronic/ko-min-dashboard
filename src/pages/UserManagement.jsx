@@ -136,7 +136,7 @@ export default function UserManagement() {
         </div>
 
         {/* Table */}
-        <div className=" overflow-x-auto bg-white rounded-lg shadow overflow-y-auto w-full h-[calc(100vh-220px)]">
+        <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto  w-[calc(100vw-70px)] lg:w-auto h-[calc(100vh-160px)]">
           <table className="w-full table-auto">
             <thead
               className="bg-gray-50 border-b border-gray-200"
@@ -174,7 +174,7 @@ export default function UserManagement() {
                 currentUsers.map((user, index) => (
                   <tr key={user._id} className="hover:bg-gray-50">
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {startIndex + index + 1}
+                      <span className="ms-1">{startIndex + index + 1}</span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center">

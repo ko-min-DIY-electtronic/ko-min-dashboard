@@ -84,7 +84,7 @@ export default function OrderDetails() {
 
   const handlePrintPDF = async () => {
     const res = await getReceiptImage(id);
-    // console.log(res);
+    console.log(res);
     if (res.code === 201) {
       handlePrintClick(res.data.receiptImage.cdnUrl);
     }
@@ -95,12 +95,17 @@ export default function OrderDetails() {
   }
 
   return (
-    <div className="h-[calc(100vh-50px)] overflow-y-auto px-5">
+    <div className="h-[calc(100vh-50px)] overflow-y-auto px-3 sm:px-5">
       <div>
-        <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 border-b border-gray-200 pb-4 gap-4">
           <div className="flex gap-2 items-center">
-            <MdArrowBack size={24} onClick={() => navigate("/orders")} />
-            <h1 className="header">Order Details</h1>
+            <button
+              className="cursor-pointer hidden sm:block"
+              onClick={() => navigate("/orders")}
+            >
+              <MdArrowBack size={24} />
+            </button>
+            <h1 className="header text-xl sm:text-2xl">Order Details</h1>
           </div>
           {/* <div className="flex gap-2 items-center"> */}
           {/* <div className="flex gap-2 items-center"></div> */}
@@ -171,53 +176,61 @@ export default function OrderDetails() {
 
         <div>
           <form className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-20">
-              <div className="space-y-10 w-full ">
-                <div className="py-4 px-5 border rounded-lg">
-                  <h1 className="font-semibold text-[24px] mb-10">Customer</h1>
-                  <div className="flex items-center gap-10 lg:gap-20">
-                    <div className="flex items-center gap-5">
-                      <img src={avatar} alt="" className="w-20 h-20" />
-                      <div className="">
-                        <p className="font-bold text-[24px]">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-20">
+              <div className="space-y-6 w-full">
+                <div className="py-4 px-3 sm:px-5 border rounded-lg">
+                  <h1 className="font-semibold text-xl sm:text-[24px] mb-6">
+                    Customer
+                  </h1>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 lg:gap-20">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                      <img
+                        src={avatar}
+                        alt=""
+                        className="w-16 h-16 sm:w-20 sm:h-20"
+                      />
+                      <div className="flex-1 sm:flex-none">
+                        <p className="font-bold text-lg sm:text-[24px] break-words">
                           {order?.userId?.userName}
                         </p>
-                        <span className="font-bold flex items-center gap-2">
+                        <span className="font-bold flex items-center gap-2 text-sm sm:text-base">
                           <MdOutlinePhone /> {order?.userId?.phoneNumber}
                         </span>
                       </div>
                     </div>
 
-                    <div>
-                      <p className="font-semibold text-[16px] mb-2">
-                        Customer Status
-                      </p>
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto">
                       <div>
-                        <span className="px-4 py-2 text-[12px] rounded-full bg-primary text-white">
-                          Regular
-                        </span>
+                        <p className="font-semibold text-[14px] sm:text-[16px] mb-2">
+                          Customer Status
+                        </p>
+                        <div>
+                          <span className="px-3 sm:px-4 py-2 text-[12px] rounded-full bg-primary text-white">
+                            Regular
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <p className="font-semibold text-[16px] mb-2">
-                        Order Status
-                      </p>
                       <div>
-                        <span className="px-4 py-2 text-[12px] rounded-full bg-[#FFF1C2] text-[#522504]">
-                          {order?.status}
-                        </span>
+                        <p className="font-semibold text-[14px] sm:text-[16px] mb-2">
+                          Order Status
+                        </p>
+                        <div>
+                          <span className="px-3 sm:px-4 py-2 text-[12px] rounded-full bg-[#FFF1C2] text-[#522504]">
+                            {order?.status}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="py-4 px-5 border rounded-lg">
-                  <h1 className="font-semibold text-[24px] mb-10">
+                <div className="py-4 px-3 sm:px-5 border rounded-lg">
+                  <h1 className="font-semibold text-xl sm:text-[24px] mb-6">
                     Delivery Address
                   </h1>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {/* city */}
                     <div>
                       <label htmlFor="city" className="label">
@@ -249,7 +262,7 @@ export default function OrderDetails() {
                     </div>
                   </div>
 
-                  <div className=" grid grid-cols-1 gap-10 mt-10">
+                  <div className="grid grid-cols-1 gap-4 sm:gap-6 mt-4 sm:mt-6">
                     {/* Address */}
                     <div>
                       <label htmlFor="address" className="label">
@@ -261,6 +274,7 @@ export default function OrderDetails() {
                         readOnly
                         value={order?.address}
                         className="input-box"
+                        rows={3}
                       />
                     </div>
                   </div>
@@ -285,10 +299,10 @@ export default function OrderDetails() {
           </form>
 
           {/* Order Section */}
-          <div className="bg-white rounded-lg shadow-sm border p-6 mt-10">
-            <div className="flex justify-between items-center mb-8 pb-4">
+          <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 mt-6 sm:mt-10">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 gap-4">
               <div className="flex items-center gap-4">
-                <h2 className="header">Order Receipt</h2>
+                <h2 className="header text-xl sm:text-2xl">Order Receipt</h2>
                 {/* <span
                   className={`px-3 py-1 text-xs font-medium rounded-full ${
                     order.deliveryStatus === "Delivered"
@@ -332,89 +346,165 @@ export default function OrderDetails() {
             </div>
 
             <div className="w-full h-auto mx-auto font-sans relative">
-              {/* Header */}
-              <div className="grid grid-cols-5 gap-4 pb-4 mb-6 border-b border-gray-200">
-                <div className="label">Items</div>
-                <div className="label text-center">Category</div>
-                <div className="label text-center">Quantity</div>
-                <div className="label text-center">Weight</div>
-                <div className="label text-right">Price</div>
+              {/* Header - Hidden on mobile, shown on desktop */}
+              <div className="hidden sm:grid grid-cols-5 gap-2 sm:gap-4 pb-4 mb-6 border-b border-gray-200">
+                <div className="label text-xs sm:text-sm">Items</div>
+                <div className="label text-center text-xs sm:text-sm">
+                  Category
+                </div>
+                <div className="label text-center text-xs sm:text-sm">
+                  Quantity
+                </div>
+                <div className="label text-center text-xs sm:text-sm">
+                  Weight
+                </div>
+                <div className="label text-right text-xs sm:text-sm">Price</div>
               </div>
 
-              {/* Item Row */}
-              {order?.products?.map((item) => (
-                <div
-                  className="grid grid-cols-5 gap-4 mb-8"
-                  key={item.stockId}
-                  // onClick={() => {
-                  //   setIsOpen(true);
-                  //   setProduct(item);
-                  //   setIsEditOpen(false);
-                  // }}
-                >
-                  <div className="text-gray-900 text-sm font-medium">
-                    {item.name}
+              {/* Item Rows - Mobile: Card layout, Desktop: Table layout */}
+              {order?.products?.map((item, index) => (
+                <div key={item.stockId}>
+                  {/* Mobile Card Layout */}
+                  <div className="sm:hidden bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs text-gray-600">
+                            Category: {item.category}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900 text-sm">
+                            {(item.unitPrice * item.quantity).toLocaleString()}{" "}
+                            MMK
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-600">
+                        <span>Qty: {item.quantity}</span>
+                        <span>
+                          Weight: {item.unitWeight} {item.weightUnit}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-gray-900 text-sm text-center">
-                    {item.category}
-                  </div>
-                  <div className="text-gray-900 text-sm text-center">
-                    {item.quantity}
-                  </div>
-                  <div className="text-gray-900 text-sm text-center">
-                    {item.unitWeight} {item.weightUnit}
-                  </div>
-                  <div className="text-gray-900 text-sm text-right">
-                    {(item.unitPrice * item.quantity).toLocaleString()} MMK
+
+                  {/* Desktop Table Row */}
+                  <div className="hidden sm:grid grid-cols-5 gap-2 sm:gap-4 mb-6 items-center">
+                    <div className="text-gray-900 text-sm font-medium">
+                      {item.name}
+                    </div>
+                    <div className="text-gray-900 text-sm text-center">
+                      {item.category}
+                    </div>
+                    <div className="text-gray-900 text-sm text-center">
+                      {item.quantity}
+                    </div>
+                    <div className="text-gray-900 text-sm text-center">
+                      {item.unitWeight} {item.weightUnit}
+                    </div>
+                    <div className="text-gray-900 text-sm text-right">
+                      {(item.unitPrice * item.quantity).toLocaleString()} MMK
+                    </div>
                   </div>
                 </div>
               ))}
 
               <div className="border-t border-gray-200 pt-4 mb-6">
-                <div className="grid grid-cols-5 gap-4 mb-8">
-                  <div className="text-gray-900 text-sm font-medium col-span-4">
-                    Delivery Fee
+                {/* Mobile Layout for Fees */}
+                <div className="sm:hidden space-y-4">
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-900 text-sm font-medium">
+                        Delivery Fee
+                      </span>
+                      <span className="text-gray-900 text-sm font-semibold">
+                        {order?.delivery.baseDeliveryFee.toLocaleString()} MMK
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="text-gray-900 text-sm text-right">
-                    {order?.delivery.baseDeliveryFee.toLocaleString()}
-                    MMK
-                  </div>
+                  {/* Only show Additional Kilo Fee if weight > 2kg */}
+                  {order?.delivery.totalWeight > 2 && (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="space-y-2">
+                        <div className="text-gray-900 text-sm font-medium">
+                          Additional Kilo Fee
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          (1000 MMK Per Kilo for weight over 2kg)
+                        </div>
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="text-gray-900 text-sm">
+                            {order?.delivery.totalWeight} kg
+                          </span>
+                          <span className="text-gray-900 text-sm font-semibold">
+                            {(
+                              order?.delivery.additionalWeightCharge *
+                              order?.delivery.totalWeight
+                            ).toLocaleString()}{" "}
+                            MMK
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="grid grid-cols-5 gap-4 mb-8">
-                  <div className="text-gray-900 text-sm font-medium col-span-3">
-                    Additional Kilo Fee <br />{" "}
-                    <span className="text-xs text-gray-500">
-                      (1000 MMK Per Kilo)
-                    </span>
+
+                {/* Desktop Layout for Fees */}
+                <div className="hidden sm:block">
+                  <div className="grid grid-cols-5 gap-2 sm:gap-4 mb-8">
+                    <div className="text-gray-900 text-sm font-medium col-span-4">
+                      Delivery Fee
+                    </div>
+                    <div className="text-gray-900 text-sm text-right">
+                      {order?.delivery.baseDeliveryFee.toLocaleString()}
+                      MMK
+                    </div>
                   </div>
-                  <div className="text-gray-900 text-sm text-center">
-                    {order?.delivery.totalWeight}
-                    kg
-                  </div>
-                  <div className="text-gray-900 text-sm text-right">
-                    {(
-                      order?.delivery.additionalWeightCharge *
-                      order?.delivery.totalWeight
-                    ).toLocaleString()}
-                    MMK
-                  </div>
+                  {/* Only show Additional Kilo Fee if weight > 2kg */}
+                  {/* {order?.delivery.totalWeight > 2 && (
+                    <div className="grid grid-cols-5 gap-2 sm:gap-4 mb-8">
+                      <div className="text-gray-900 text-sm font-medium col-span-3">
+                        Additional Kilo Fee <br />{" "}
+                        <span className="text-xs text-gray-500">
+                          (1000 MMK Per Kilo for weight over 2kg)
+                        </span>
+                      </div>
+                      <div className="text-gray-900 text-sm text-center">
+                        {order?.delivery.totalWeight}
+                        kg
+                      </div>
+                      <div className="text-gray-900 text-sm text-right">
+                        {(
+                          order?.delivery.additionalWeightCharge *
+                          order?.delivery.totalWeight
+                        ).toLocaleString()}
+                        MMK
+                      </div>
+                    </div>
+                  )} */}
                 </div>
               </div>
 
               <div>
                 {/* Total Section */}
                 <div className="border-t border-gray-200 pt-4 mb-6">
-                  <div className="flex justify-between items-center">
-                    <div className="text-gray-900 text-lg font-semibold">
-                      Total
-                    </div>
-                    <div className="text-gray-900 text-lg font-semibold">
-                      {(
-                        order?.totalAmount +
-                        order.delivery.calculatedDeliveryFee
-                      ).toLocaleString()}
-                      MMK
+                  <div className="bg-blue-50 rounded-lg p-4 sm:p-6 border border-blue-200">
+                    <div className="flex justify-between items-center">
+                      <div className="text-gray-900 text-lg sm:text-xl font-bold">
+                        Total
+                      </div>
+                      <div className="text-gray-900 text-lg sm:text-xl font-bold">
+                        {(
+                          order?.totalAmount +
+                          order.delivery.calculatedDeliveryFee
+                        ).toLocaleString()}
+                        MMK
+                      </div>
                     </div>
                   </div>
                 </div>

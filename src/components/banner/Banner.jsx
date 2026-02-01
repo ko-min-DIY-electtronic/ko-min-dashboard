@@ -43,9 +43,6 @@ function Banner() {
       <div className="flex flex-col lg:flex-row items-center justify-between mb-6">
         <div>
           <h1 className="header ml-8 lg:ml-0">Banner Management</h1>
-          <p className="text-gray-600 mt-2">
-            Manage promotional banners and featured products
-          </p>
         </div>
 
         <div className="flex items-center space-x-4 mt-4 lg:mt-0">
@@ -62,7 +59,7 @@ function Banner() {
             >
               <path d="M480-120 200-272v-240L40-600l440-240 440 240v320h-80v-276l-80 43v240L480-120Zm0-332 274-148-274-148-274 148 274 148Zm0 241 200-108v-151L480-360 280-470v151l200 108Zm0-241Zm0 90Zm0 0Z" />
             </svg>
-            <span className="hidden md:block text-[14px]">Refresh</span>
+            <span className="block text-[14px]">Refresh</span>
           </button>
 
           <button
@@ -78,7 +75,7 @@ function Banner() {
             >
               <path d="M640-640h120-120Zm-440 0h338-18 14-334Zm16-80h528l-34-40H250l-34 40Zm184 270 80-40 80 40v-190H400v190Zm182 330H200q-33 0-56.5-23.5T120-200v-499q0-14 4.5-27t13.5-24l50-61q11-14 27.5-21.5T250-840h460q18 0 34.5 7.5T772-811l50 61q9 11 13.5 24t4.5 27v196q-19-7-39-11t-41-4v-122H640v153q-35 20-61 49.5T538-371l-58-29-160 80v-320H200v440h334q8 23 20 43t28 37Zm138 0v-120H600v-80h120v-120h80v120h120v80H800v120h-80Z" />
             </svg>
-            <span className="hidden md:block text-[14px]">Add Banner</span>
+            <span className="block text-[14px]">Add Banner</span>
           </button>
         </div>
       </div>

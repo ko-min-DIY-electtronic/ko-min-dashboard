@@ -40,7 +40,7 @@ const LoginPage = () => {
 
   return (
     <div className="flex w-full justify-center items-center h-screen">
-      <div className="w-full md:w-[450px] bg-white rounded-lg p-20 md:p-6">
+      <div className="w-full md:w-[450px] bg-white rounded-lg p-6">
         <h2 className="header font-bold mb-10 border-b pb-5">
           Sign in to Ko Min DIY Store
         </h2>
@@ -55,7 +55,7 @@ const LoginPage = () => {
               name="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter Staff Name"
+              placeholder="Enter Name"
               required
               className="block w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -70,7 +70,7 @@ const LoginPage = () => {
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter Account Password"
+              placeholder="Enter Password"
               required
               className="block w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
