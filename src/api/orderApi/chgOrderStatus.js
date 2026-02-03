@@ -5,7 +5,7 @@ const chgOrderStatus = async ({ orderId, data }) => {
   console.log("orderId", orderId);
   const toastId = toast.loading("Updating order status...");
   try {
-    const response = await axios.patch(`/order/${orderId}`, data);
+    const response = await axios.patch(`order/${orderId}`, data);
     console.log(response);
     toast.success("Order status updated successfully!", {
       id: toastId,

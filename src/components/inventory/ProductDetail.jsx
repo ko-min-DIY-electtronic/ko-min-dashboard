@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Upload, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import addProduct from "../../api/inventoryApi/AddProduct";
 import { useNavigate } from "react-router-dom";
 import getAllCategory from "../../api/inventoryApi/GetAllCategory";
@@ -8,6 +9,9 @@ import Loading from "../utli/Loading";
 import { useParams } from "react-router-dom";
 import { MdOutlineEdit } from "react-icons/md";
 import deleteStock from "../../api/inventoryApi/DeleteStock";
+import deleteStockImage from "../../api/inventoryApi/deleteStockImage";
+import addStockImages from "../../api/inventoryApi/addStockImages";
+import ConfirmModal from "../ui/ConfirmModal";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -33,17 +37,58 @@ const ProductDetail = () => {
 
   const [wholesalePrices, setWholesalePrices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState(null);
+  const [isDeleteProductModalOpen, setIsDeleteProductModalOpen] =
+    useState(false);
+  const [newImages, setNewImages] = useState([]);
+  const [isAddingImages, setIsAddingImages] = useState(false);
 
   const deleteProduct = async (productId) => {
+    setIsDeleteProductModalOpen(true);
+  };
+
+  const confirmDeleteProduct = async () => {
     try {
-      const response = await deleteStock(productId);
+      const response = await deleteStock(porductId);
       if (response.success) {
+        toast.success("Product deleted successfully");
         navigate("/");
       }
     } catch (error) {
-      // console.log(error);
+      console.error("Error deleting product:", error);
+      toast.error("Failed to delete product. Please try again.");
     }
   };
+
+  const deleteImage = async (image) => {
+    setImageToDelete(image);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteImage = async () => {
+    if (!imageToDelete) return;
+
+    try {
+      const response = await deleteStockImage(
+        porductId,
+        imageToDelete.spaceKey,
+      );
+      if (response.success) {
+        // Update the uploadedImages state to remove the deleted image
+        setUploadedImages((prev) =>
+          prev.filter((img) => img._id !== imageToDelete._id),
+        );
+        toast.success("Image deleted successfully");
+      }
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      toast.error("Failed to delete image. Please try again.");
+    } finally {
+      setImageToDelete(null);
+    }
+  };
+
   const validateField = (name, value) => {
     const requiredFields = [
       "productName",
@@ -109,14 +154,14 @@ const ProductDetail = () => {
     const maxImages = 3;
 
     if (uploadedImages.length + files.length > maxImages) {
-      alert(`You can only upload up to ${maxImages} images`);
+      toast.error(`You can only upload up to ${maxImages} images`);
       return;
     }
 
     files.forEach((file) => {
       if (file.size > 10 * 1024 * 1024) {
         // 10MB limit
-        alert("File size must be less than 10MB");
+        toast.error("File size must be less than 10MB");
         return;
       }
 
@@ -138,6 +183,75 @@ const ProductDetail = () => {
 
   const removeImage = (imageId) => {
     setUploadedImages((prev) => prev.filter((img) => img.id !== imageId));
+  };
+
+  const handleNewImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const maxNewImages = 3 - uploadedImages.length;
+
+    if (maxNewImages <= 0) {
+      toast.error("Maximum number of images reached (3 images)");
+      return;
+    }
+
+    if (files.length > maxNewImages) {
+      toast.error(`You can only add up to ${maxNewImages} more images`);
+      return;
+    }
+
+    files.forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        // 10MB limit
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setNewImages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            file: file,
+            url: e.target.result,
+            name: file.name,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeNewImage = (imageId) => {
+    setNewImages((prev) => prev.filter((img) => img.id !== imageId));
+  };
+
+  const handleAddImages = async () => {
+    if (newImages.length === 0) {
+      toast.error("Please select images to add");
+      return;
+    }
+
+    setIsAddingImages(true);
+    const formData = new FormData();
+
+    newImages.forEach((img) => {
+      formData.append("images", img.file);
+    });
+
+    try {
+      const response = await addStockImages(porductId, formData);
+      if (response.success) {
+        // Refresh product data to get updated images
+        await getProduct();
+        setNewImages([]);
+        toast.success("Images added successfully!");
+      }
+    } catch (error) {
+      console.error("Error adding images:", error);
+    } finally {
+      setIsAddingImages(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -178,7 +292,7 @@ const ProductDetail = () => {
     data.append("category", formData.productCategory);
     data.append(
       "onSale",
-      formData.storeInventory === "sellProduct" ? true : false
+      formData.storeInventory === "sellProduct" ? true : false,
     );
     if (uploadedImages.length > 0) {
       uploadedImages.forEach((img) => {
@@ -210,7 +324,7 @@ const ProductDetail = () => {
 
   const handleWholesaleChange = (id, field, value) => {
     setWholesalePrices((prev) =>
-      prev.map((w) => (w.id === id ? { ...w, [field]: value } : w))
+      prev.map((w) => (w.id === id ? { ...w, [field]: value } : w)),
     );
   };
 
@@ -223,7 +337,7 @@ const ProductDetail = () => {
   };
 
   const filteredCategories = categoryOptions.filter((category) =>
-    category.toLowerCase().includes(formData.productCategory.toLowerCase())
+    category.toLowerCase().includes(formData.productCategory.toLowerCase()),
   );
 
   const getProduct = async () => {
@@ -633,7 +747,7 @@ const ProductDetail = () => {
                           handleWholesaleChange(
                             wholesale.id,
                             "qty",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder="Eg - 10"
@@ -653,7 +767,7 @@ const ProductDetail = () => {
                             handleWholesaleChange(
                               wholesale.id,
                               "price",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           placeholder="Eg - 55000"
@@ -699,16 +813,85 @@ const ProductDetail = () => {
                               {(image.file.size / 1024 / 1024).toFixed(2)} MB
                             </p>
                           </div> */}
-                          {/* <button
+                          <button
                             type="button"
-                            onClick={() => removeImage(image.id)}
+                            onClick={() => deleteImage(image)}
                             className="p-1 text-red-500 bg-white hover:bg-red-200 hover:text-red-600 rounded absolute top-2 right-2"
                           >
                             <Trash2 className="w-4 h-4" />
-                          </button> */}
+                          </button>
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Add New Images Section */}
+                {uploadedImages.length < 3 && (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">
+                      Add More Images ({uploadedImages.length}/3)
+                    </h3>
+
+                    {/* New Images Preview */}
+                    {newImages.length > 0 && (
+                      <div className="mb-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+                          {newImages.map((image) => (
+                            <div key={image.id} className="relative">
+                              <img
+                                src={image.url}
+                                alt={image.name}
+                                className="w-full h-20 object-cover rounded-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeNewImage(image.id)}
+                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Upload Controls */}
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleNewImageUpload}
+                        className="hidden"
+                        id="new-image-upload"
+                      />
+                      <label
+                        htmlFor="new-image-upload"
+                        className="flex-1 cursor-pointer bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 text-center transition-colors"
+                      >
+                        <Upload className="w-4 h-4 inline mr-2" />
+                        Choose Images
+                      </label>
+
+                      {newImages.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleAddImages}
+                          disabled={isAddingImages}
+                          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-sm transition-colors"
+                        >
+                          {isAddingImages
+                            ? "Adding..."
+                            : `Add ${newImages.length} Image${newImages.length > 1 ? "s" : ""}`}
+                        </button>
+                      )}
+                    </div>
+
+                    <p className="text-xs text-gray-500 mt-2">
+                      Maximum 3 images total. Each image must be less than 10MB.
+                    </p>
                   </div>
                 )}
               </div>
@@ -734,6 +917,33 @@ const ProductDetail = () => {
           </button>
         </div>
       </form>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setImageToDelete(null);
+        }}
+        onConfirm={confirmDeleteImage}
+        title="Delete Image"
+        message="Are you sure you want to delete this image? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
+
+      {/* Delete Product Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isDeleteProductModalOpen}
+        onClose={() => setIsDeleteProductModalOpen(false)}
+        onConfirm={confirmDeleteProduct}
+        title="Delete Product"
+        message={`Are you sure you want to delete "${formData.productName}"? This action cannot be undone and will permanently remove the product from inventory.`}
+        confirmText="Delete Product"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };
