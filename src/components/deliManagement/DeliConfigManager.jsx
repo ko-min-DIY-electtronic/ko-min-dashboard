@@ -4,6 +4,9 @@ import { DeliveryConfigForm } from "./DeliConfigForm";
 import { DeliveryConfigCard } from "./DeliConfigCard";
 import { Plus, Search, Filter, ChevronDown } from "lucide-react";
 import getAllDeliverZone from "../../api/deliveryApi/getAllDeliZone";
+import updateDeliZone from "../../api/deliveryApi/updateDeliZone";
+import deleteDeliZone from "../../api/deliveryApi/deleteDeliZone";
+import ConfirmModal from "../ui/ConfirmModal";
 
 export const DeliveryConfigManager = () => {
   const [configs, setConfigs] = useState([]);
@@ -13,6 +16,13 @@ export const DeliveryConfigManager = () => {
   const [editingConfig, setEditingConfig] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterReachable, setFilterReachable] = useState(null);
+
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    configId: null,
+    configName: "",
+  });
 
   const getDeliverZone = async () => {
     try {
@@ -39,15 +49,31 @@ export const DeliveryConfigManager = () => {
     setShowForm(false);
   };
 
-  const handleUpdateConfig = (updatedConfig) => {
-    setConfigs((prev) =>
-      prev.map((config) =>
-        config.id === editingConfig?.id
-          ? { ...updatedConfig, id: config.id }
-          : config,
-      ),
-    );
-    setEditingConfig(null);
+  const handleUpdateConfig = async (updatedConfig) => {
+    try {
+      // Call the API to update the delivery configuration with both new and original data
+      const response = await updateDeliZone(
+        editingConfig._id,
+        updatedConfig,
+        editingConfig,
+      );
+
+      // Update local state with the response data
+      setConfigs((prev) =>
+        prev.map((config) =>
+          config._id === editingConfig._id
+            ? { ...response.data, _id: config._id }
+            : config,
+        ),
+      );
+      setEditingConfig(null);
+
+      // Refresh the data to ensure consistency
+      getDeliverZone();
+    } catch (error) {
+      console.error("Error updating delivery config:", error);
+      // Error is already handled by the API function with toast
+    }
   };
 
   const handleEditConfig = (config) => {
@@ -55,10 +81,46 @@ export const DeliveryConfigManager = () => {
     setShowForm(false);
   };
 
-  const handleDeleteConfig = (id) => {
-    if (window.confirm("Are you sure you want to delete this configuration?")) {
-      setConfigs((prev) => prev.filter((config) => config.id !== id));
+  const handleDeleteConfig = (id, city, township) => {
+    setConfirmModal({
+      isOpen: true,
+      configId: id,
+      configName: `${city}, ${township}`,
+    });
+  };
+
+  const confirmDelete = async () => {
+    try {
+      // Call the API to delete the delivery configuration
+      await deleteDeliZone(confirmModal.configId);
+
+      // Remove from local state
+      setConfigs((prev) =>
+        prev.filter((config) => config._id !== confirmModal.configId),
+      );
+
+      // Refresh the data to ensure consistency
+      getDeliverZone();
+
+      // Close modal
+      setConfirmModal({
+        isOpen: false,
+        configId: null,
+        configName: "",
+      });
+    } catch (error) {
+      console.error("Error deleting delivery config:", error);
+      // Error is already handled by the API function with toast
+      // Don't close modal on error so user can try again
     }
+  };
+
+  const cancelDelete = () => {
+    setConfirmModal({
+      isOpen: false,
+      configId: null,
+      configName: "",
+    });
   };
 
   const handleCancelEdit = () => {
@@ -258,6 +320,18 @@ export const DeliveryConfigManager = () => {
             )}
           </div>
         )}
+
+        {/* Confirmation Modal */}
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={cancelDelete}
+          onConfirm={confirmDelete}
+          title="Delete Delivery Configuration"
+          message={`Are you sure you want to delete the delivery configuration for ${confirmModal.configName}? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          type="danger"
+        />
       </div>
     </div>
   );

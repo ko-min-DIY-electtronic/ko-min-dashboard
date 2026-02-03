@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import getAnalytics from "../api/reportApi/getAnalytics";
+import getSalesReport from "../api/reportApi/getSalesReport";
 import Loading from "../components/utli/Loading";
+import { DateRangePicker } from "../components/utli/DateRangePicker";
 import {
   MdTrendingUp,
   MdShoppingCart,
@@ -12,10 +14,33 @@ import {
   MdCalendarViewMonth,
 } from "react-icons/md";
 
+// Helper function to get today's date
+const getToday = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+
 export default function SalesReport() {
   const [analytics, setAnalytics] = useState(null);
+  const [salesReport, setSalesReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  // Initialize dates to last 30 days
+  const [startDate, setStartDate] = useState(() => {
+    const thirtyDaysAgo = new Date(getToday());
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return thirtyDaysAgo;
+  });
+  const [endDate, setEndDate] = useState(getToday());
+
+  const formatDateForAPI = (date) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
   const fetchAnalytics = async (isRefresh = false) => {
     if (isRefresh) {
@@ -35,12 +60,54 @@ export default function SalesReport() {
     }
   };
 
+  const fetchSalesReport = async (isRefresh = false) => {
+    if (!startDate || !endDate) return;
+
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      const startDateStr = formatDateForAPI(startDate);
+      const endDateStr = formatDateForAPI(endDate);
+      console.log("Fetching sales report with dates:", {
+        startDateStr,
+        endDateStr,
+      });
+      const response = await getSalesReport(startDateStr, endDateStr);
+      console.log("res", response);
+      setSalesReport(response);
+    } catch (error) {
+      console.error("Error fetching sales report:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     fetchAnalytics();
+    fetchSalesReport();
   }, []);
+
+  useEffect(() => {
+    console.log("useEffect triggered with dates:", { startDate, endDate });
+    if (startDate && endDate) {
+      fetchSalesReport();
+    }
+  }, [startDate, endDate]);
+
+  const handleDateRangeChange = (start, end) => {
+    console.log("Date range changed:", { start, end });
+    setStartDate(start);
+    setEndDate(end);
+  };
 
   const handleRefresh = () => {
     fetchAnalytics(true);
+    fetchSalesReport(true);
   };
 
   const formatCurrency = (amount) => {
@@ -103,25 +170,85 @@ export default function SalesReport() {
     <div className="h-[calc(100vh-50px)] overflow-y-auto px-5 py-6">
       <div className="">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Sales Report
             </h1>
             <p className="text-gray-600">
-              Last updated: {new Date(analytics?.generatedAt).toLocaleString()}
+              Last updated:{" "}
+              {new Date(
+                salesReport?.data?.overview?.byDate?.[0]?.date || Date.now(),
+              ).toLocaleString()}
             </p>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-          >
-            <MdRefresh
-              className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Date Range Picker */}
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onChange={handleDateRangeChange}
             />
-            {refreshing ? "Refreshing..." : "Refresh"}
-          </button>
+
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              <MdRefresh
+                className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+              />
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
+        </div>
+
+        {/* Sales Report Overview */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+            Sales Overview (
+            {startDate ? startDate.toLocaleDateString() : "Start"} to{" "}
+            {endDate ? endDate.toLocaleDateString() : "End"})
+          </h2>
+
+          {/* Overview Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              title="Total Sales"
+              value={`${formatCurrency(salesReport?.data?.overview?.totalSales || 0)} MMK`}
+              icon={MdTrendingUp}
+              color="bg-green-100"
+            />
+            <StatCard
+              title="Total Orders"
+              value={salesReport?.data?.overview?.totalOrders || 0}
+              icon={MdShoppingCart}
+              color="bg-blue-100"
+            />
+            <StatCard
+              title="Pending Orders"
+              value={
+                salesReport?.data?.overview?.byStatusObject?.pending?.count || 0
+              }
+              icon={MdCalendarToday}
+              color="bg-yellow-100"
+            />
+            <StatCard
+              title="Cash Down Payments"
+              value={
+                salesReport?.data?.overview?.byPaymentMethodObject?.[
+                  "cash-down"
+                ]?.count || 0
+              }
+              icon={MdLocalShipping}
+              color="bg-purple-100"
+            />
+          </div>
+
+          {/* Sales by Date */}
+
+          {/* Recent Orders */}
         </div>
 
         {/* Performance Summary */}
@@ -131,6 +258,8 @@ export default function SalesReport() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <TimePeriodCard
+              period="today"
+              data={analytics?.today}
               period={analytics?.performanceSummary?.today}
               data={analytics?.performanceSummary?.today || {}}
               icon={MdCalendarToday}

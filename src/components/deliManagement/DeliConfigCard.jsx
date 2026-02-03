@@ -24,7 +24,7 @@ export const DeliveryConfigCard = ({ config, onEdit, onDelete }) => {
           </div>
         </div>
 
-        {/* <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => onEdit(config)}
             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -33,13 +33,15 @@ export const DeliveryConfigCard = ({ config, onEdit, onDelete }) => {
             <Edit3 className="w-4 h-4" />
           </button>
           <button
-            onClick={() => config.id && onDelete(config.id)}
+            onClick={() =>
+              config._id && onDelete(config._id, config.city, config.township)
+            }
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Delete configuration"
           >
             <Trash2 className="w-4 h-4" />
           </button>
-        </div> */}
+        </div>
       </div>
 
       {/* Details */}
