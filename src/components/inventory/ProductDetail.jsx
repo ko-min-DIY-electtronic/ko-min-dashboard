@@ -27,6 +27,9 @@ const ProductDetail = () => {
     productType: "inStock",
     storeInventory: "sellProduct",
     productCategory: "",
+    tags: [],
+    isDiscounted: false,
+    discountPercentage: 0,
   });
 
   const [errors, setErrors] = useState({});
@@ -356,6 +359,9 @@ const ProductDetail = () => {
         productCategory: response.data.category,
         storeInventory: response.data.onSale,
         productType: response.data.saleType,
+        tags: response.data.tags || [],
+        isDiscounted: response.data.isDiscounted || false,
+        discountPercentage: response.data.discountPercentage || 0,
       });
       setWholesalePrices(response.data.wholeSale);
       setUploadedImages(response.data.images);
@@ -414,14 +420,28 @@ const ProductDetail = () => {
                   onBlur={handleBlur}
                   placeholder="Enter Product Name"
                   required
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none  ${
-                    errors.productName ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none  ${errors.productName ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 {errors.productName && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.productName}
                   </p>
+                )}
+
+                {/* Tags Display */}
+                {formData.tags && formData.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {formData.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-100 shadow-sm hover:bg-blue-100 transition-colors"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-2"></span>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
 
@@ -440,9 +460,8 @@ const ProductDetail = () => {
                     onBlur={handleBlur}
                     placeholder="Enter Product Code"
                     required
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none  ${
-                      errors.productCode ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none  ${errors.productCode ? "border-red-500" : "border-gray-300"
+                      }`}
                   />
                   {errors.productCode && (
                     <p className="mt-1 text-sm text-red-600">
@@ -452,33 +471,21 @@ const ProductDetail = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Retail Price
+                    Retail Price {formData.isDiscounted && <span className="text-red-600 font-bold">({formData.discountPercentage}% OFF)</span>}
                   </label>
                   <div className="relative">
                     <input
-                      type="number"
+                      type="text"
                       name="retailPrice"
-                      value={formData.retailPrice}
+                      value={
+                        formData.isDiscounted
+                          ? `${(formData.retailPrice * (1 - formData.discountPercentage / 100)).toLocaleString()} MMK (Original: ${formData.retailPrice.toLocaleString()})`
+                          : `${formData.retailPrice.toLocaleString()} MMK`
+                      }
                       readOnly
-                      onChange={handleInputChange}
-                      onBlur={handleBlur}
-                      placeholder="Enter Retail Price"
-                      required
-                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none  ${
-                        errors.retailPrice
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
                     />
-                    <span className="absolute right-3 top-2 text-sm text-gray-500">
-                      MMK
-                    </span>
                   </div>
-                  {errors.retailPrice && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.retailPrice}
-                    </p>
-                  )}
                 </div>
               </div>
 
@@ -498,11 +505,10 @@ const ProductDetail = () => {
                       onBlur={handleBlur}
                       placeholder="Enter Quantity"
                       required
-                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none  ${
-                        errors.totalQuantity
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`}
+                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none  ${errors.totalQuantity
+                        ? "border-red-500"
+                        : "border-gray-300"
+                        }`}
                     />
                     <span className="absolute right-3 top-2 text-sm text-gray-500">
                       PCS
@@ -529,9 +535,8 @@ const ProductDetail = () => {
                       onBlur={handleBlur}
                       placeholder="Enter Weight"
                       required
-                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none  ${
-                        errors.weight ? "border-red-500" : "border-gray-300"
-                      }`}
+                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none  ${errors.weight ? "border-red-500" : "border-gray-300"
+                        }`}
                     />
                     <span className="absolute right-3 top-2 text-sm text-gray-500">
                       KG
@@ -557,9 +562,8 @@ const ProductDetail = () => {
                   placeholder="Describe what this kind of product is"
                   rows={4}
                   required
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none  resize-none ${
-                    errors.description ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none  resize-none ${errors.description ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-red-600">
@@ -668,11 +672,10 @@ const ProductDetail = () => {
                     onFocus={() => setIsCategoryDropdownOpen(true)}
                     placeholder="Enter Product Category"
                     // required
-                    className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none  ${
-                      errors.productCategory
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none  ${errors.productCategory
+                      ? "border-red-500"
+                      : "border-gray-300"
+                      }`}
                   />
                   <button
                     type="button"
@@ -700,15 +703,15 @@ const ProductDetail = () => {
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                       {filteredCategories.length > 0
                         ? filteredCategories.map((category, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => handleCategorySelect(category)}
-                              className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                            >
-                              {category}
-                            </button>
-                          ))
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleCategorySelect(category)}
+                            className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                          >
+                            {category}
+                          </button>
+                        ))
                         : null}
                     </div>
                   )}

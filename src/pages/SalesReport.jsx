@@ -88,7 +88,7 @@ export default function SalesReport() {
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    // fetchAnalytics();
     fetchSalesReport();
   }, []);
 
@@ -106,7 +106,7 @@ export default function SalesReport() {
   };
 
   const handleRefresh = () => {
-    fetchAnalytics(true);
+    // fetchAnalytics(true);
     fetchSalesReport(true);
   };
 
@@ -258,8 +258,6 @@ export default function SalesReport() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <TimePeriodCard
-              period="today"
-              data={analytics?.today}
               period={analytics?.performanceSummary?.today}
               data={analytics?.performanceSummary?.today || {}}
               icon={MdCalendarToday}
