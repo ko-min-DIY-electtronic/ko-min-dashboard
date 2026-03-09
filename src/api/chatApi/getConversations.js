@@ -11,3 +11,12 @@ export const getConversations = async (page = 1, limit = 10) => {
     throw error;
   }
 };
+export const markConversationAsRead = async (conversationId) => {
+  try {
+    const response = await axios.patch(`/conversations/${conversationId}/read`);
+    return response.data;
+  } catch (error) {
+    console.error("Error marking conversation as read:", error);
+    throw error;
+  }
+};

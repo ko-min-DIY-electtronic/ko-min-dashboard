@@ -2,10 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, User, Bot } from "lucide-react";
 import { toast } from "sonner";
-import {
-  getConversationMessages,
-  sendMessage,
-} from "../../api/chatApi/chatMessages";
+import { getConversationMessages, sendMessage } from "../../api/chatApi/chatMessages";
+import { markConversationAsRead } from "../../api/chatApi/getConversations";
 import { io } from "socket.io-client";
 import Loading from "../utli/Loading";
 
@@ -78,6 +76,11 @@ const ChatDetail = () => {
       setConversation(response.data.conversation);
       setMessages(response.data.messages.reverse());
       setPagination(response.data.pagination);
+
+      // Mark as read when conversation is opened
+      if (!response.data.conversation.isRead) {
+        await markConversationAsRead(id);
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
     } finally {

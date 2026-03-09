@@ -72,6 +72,7 @@ const ChatList = () => {
     try {
       setLoading(true);
       const response = await getConversations(currentPage, 10);
+      console.log("Conversations:", response.data.conversations);
       setConversations(response.data.conversations);
       setPagination(response.data.pagination);
     } catch (error) {
@@ -140,37 +141,55 @@ const ChatList = () => {
               <div
                 key={conversation._id}
                 onClick={() => handleConversationClick(conversation._id)}
-                className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                className={`p-4 hover:bg-gray-100 transition-colors cursor-pointer border-l-4 ${!conversation.isRead
+                    ? "bg-blue-50/40 border-blue-500 shadow-sm"
+                    : "bg-white border-transparent"
+                  }`}
               >
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="h-6 w-6 text-blue-600" />
+                  <div className="flex-shrink-0 relative">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${!conversation.isRead ? "bg-blue-200" : "bg-gray-100"
+                      }`}>
+                      <User className={`h-6 w-6 ${!conversation.isRead ? "text-blue-700" : "text-gray-500"
+                        }`} />
                     </div>
+                    {!conversation.isRead && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-600 border-2 border-white"></span>
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-gray-900 truncate">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className={`text-sm tracking-tight truncate ${!conversation.isRead ? "font-bold text-gray-900" : "font-medium text-gray-700"
+                        }`}>
                         {conversation.userId.userName}
                       </h3>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-gray-500">
-                          {formatTime(conversation.lastMessageAt)}
-                        </span>
-                        {!conversation.isRead && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        )}
-                      </div>
+                      <span className={`text-xs ${!conversation.isRead ? "text-blue-600 font-bold" : "text-gray-500"
+                        }`}>
+                        {formatTime(conversation.lastMessageAt)}
+                      </span>
                     </div>
 
-                    <p className="text-sm text-gray-400 mb-1">
-                      {conversation.userId.phoneNumber}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-400 mb-1">
+                          {conversation.userId.phoneNumber}
+                        </p>
+                        <p className={`text-sm truncate ${!conversation.isRead ? "text-gray-900 font-bold" : "text-gray-600 font-normal"
+                          }`}>
+                          {conversation.lastMessage}
+                        </p>
+                      </div>
 
-                    <p className="text-md text-gray-700 font-semibold truncate">
-                      {conversation.lastMessage}
-                    </p>
+                      {!conversation.isRead && (
+                        <div className="ml-2 bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          New
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
