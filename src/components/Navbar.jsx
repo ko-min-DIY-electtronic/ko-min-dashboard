@@ -63,13 +63,6 @@ function Navbar() {
       role: "delivery",
       secondaryRole: "customer-support",
     },
-    // {
-    //   path: "/chat",
-    //   icon: MessageCircle,
-    //   label: "Chat",
-    //   role: "customer-support",
-    //   secondaryRole: "admin",
-    // },
     {
       path: "/sales-report",
       icon: BarChart3,
@@ -89,6 +82,13 @@ function Navbar() {
       icon: Shield,
       label: "Admin Accounts",
       role: "admin",
+      secondaryRole: "admin",
+    },
+    {
+      path: "/chat",
+      icon: MessageCircle,
+      label: "Chat",
+      role: "customer-support",
       secondaryRole: "admin",
     },
   ];
@@ -174,11 +174,10 @@ function Navbar() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`
                         flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                        ${
-                          isActive(item.path)
-                            ? "bg-primary text-white shadow-lg"
-                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        }
+                        ${isActive(item.path)
+                        ? "bg-primary text-white shadow-lg"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      }
                     `}
                   >
                     <Icon size={20} />
@@ -255,10 +254,9 @@ function Navbar() {
                       to={item.path}
                       className={`
                         flex items-center px-3 py-3 rounded-lg transition-all duration-300 relative group
-                        ${
-                          isActive(item.path, item.secondaryPath)
-                            ? "bg-primary text-white shadow-lg "
-                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        ${isActive(item.path, item.secondaryPath)
+                          ? "bg-primary text-white shadow-lg "
+                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                         }
  
                       `}
@@ -280,17 +278,15 @@ function Navbar() {
 
                     {!isDesktopExpanded && (
                       <div
-                        className={`${
-                          item.path === "/new-order" ? "" : "hidden"
-                        }`}
+                        className={`${item.path === "/new-order" ? "" : "hidden"
+                          }`}
                       >
                         {item.newOrderCount > 0 && item.newOrderCount <= 9 && (
                           <span
-                            className={`absolute bottom-7 right-0 left-8 inline-flex items-center justify-center  px-[12px] py-[3px] text-xs font-medium  rounded-full ${
-                              location.pathname === "/new-order"
-                                ? "bg-white text-primary"
-                                : "bg-primary text-white"
-                            }`}
+                            className={`absolute bottom-7 right-0 left-8 inline-flex items-center justify-center  px-[12px] py-[3px] text-xs font-medium  rounded-full ${location.pathname === "/new-order"
+                              ? "bg-white text-primary"
+                              : "bg-primary text-white"
+                              }`}
                           >
                             {item.newOrderCount}
                           </span>
@@ -307,11 +303,10 @@ function Navbar() {
                       <div>
                         {item.messageCount > 0 && item.messageCount <= 9 && (
                           <span
-                            className={`absolute bottom-7 right-0 left-8 inline-flex items-center justify-center  px-[12px] py-[3px] text-xs font-medium  rounded-full ${
-                              location.pathname === "/support"
-                                ? "bg-white text-primary"
-                                : "bg-primary text-white"
-                            }`}
+                            className={`absolute bottom-7 right-0 left-8 inline-flex items-center justify-center  px-[12px] py-[3px] text-xs font-medium  rounded-full ${location.pathname === "/support"
+                              ? "bg-white text-primary"
+                              : "bg-primary text-white"
+                              }`}
                           >
                             {item.messageCount}
                           </span>

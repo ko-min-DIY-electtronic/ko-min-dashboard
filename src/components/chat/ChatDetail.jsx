@@ -6,7 +6,14 @@ import {
   getConversationMessages,
   sendMessage,
 } from "../../api/chatApi/chatMessages";
+import { io } from "socket.io-client";
 import Loading from "../utli/Loading";
+
+const socket = io.connect(import.meta.env.VITE_APP_WEBSOCKET_API, {
+  transports: ["websocket"],
+  secure: true,
+});
+
 
 const ChatDetail = () => {
   const { id } = useParams();
@@ -19,11 +26,46 @@ const ChatDetail = () => {
   const [sending, setSending] = useState(false);
   const [pagination, setPagination] = useState({});
 
+  // ── Fetch messages + Socket: join room & listen ──────────────────────
   useEffect(() => {
-    if (id) {
-      fetchMessages();
-    }
-  }, [id]);
+    if (!id) return;
+
+
+    // 1. Fetch existing messages via API
+    fetchMessages();
+
+    // 2. Clean any previous listener
+    socket.off("chat:message");
+
+
+    // 4. Join the conversation room (wait for connection if needed)
+    const emitJoin = () => {
+      socket.emit("chat:join", id);
+      console.log("Joined conversation room:", id);
+    };
+
+    emitJoin();
+
+
+    // 3. Register the message listener
+    socket.on("chat:message", (data) => {
+      // If data.message is an object, it's the new wrapped format; 
+      // otherwise, data itself is likely the message object.
+      const message = (data && data.message && typeof data.message === 'object') ? data.message : data;
+
+      setMessages((prev) => {
+        if (prev.some((m) => m._id === message._id)) {
+          return prev;
+        }
+        return [...prev, message];
+      });
+    });
+
+    // 5. Cleanup on unmount or when id changes
+    return () => {
+      socket.off("chat:message");
+    };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -53,9 +95,7 @@ const ChatDetail = () => {
 
       if (response.success) {
         setNewMessage("");
-        toast.success("Message sent successfully!");
-        // Refresh messages to show the new message
-        fetchMessages();
+
       } else {
         toast.error("Failed to send message");
         console.error("Failed to send message:", response.message);
@@ -88,14 +128,6 @@ const ChatDetail = () => {
       return "Yesterday";
     } else {
       return date.toLocaleDateString();
-    }
-  };
-
-  const getSenderName = (message) => {
-    if (message.senderModel === "Admin") {
-      return message.senderId.name || "Admin";
-    } else {
-      return message.senderId.userName || "Customer";
     }
   };
 
@@ -164,7 +196,7 @@ const ChatDetail = () => {
               const showDate =
                 index === 0 ||
                 formatDate(messages[index - 1].createdAt) !==
-                  formatDate(message.createdAt);
+                formatDate(message.createdAt);
 
               return (
                 <div key={message._id}>
@@ -177,19 +209,16 @@ const ChatDetail = () => {
                   )}
 
                   <div
-                    className={`flex ${
-                      isAdmin ? "justify-end" : "justify-start"
-                    }`}
+                    className={`flex ${isAdmin ? "justify-end" : "justify-start"
+                      }`}
                   >
                     <div
-                      className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${
-                        isAdmin ? "flex-row-reverse space-x-reverse" : ""
-                      }`}
+                      className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${isAdmin ? "flex-row-reverse space-x-reverse" : ""
+                        }`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          isAdmin ? "bg-blue-500" : "bg-gray-300"
-                        }`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isAdmin ? "bg-blue-500" : "bg-gray-300"
+                          }`}
                       >
                         {isAdmin ? (
                           <Bot className="h-4 w-4 text-white" />
@@ -199,17 +228,15 @@ const ChatDetail = () => {
                       </div>
 
                       <div
-                        className={`px-4 py-2 rounded-lg ${
-                          isAdmin
-                            ? "bg-blue-500 text-white"
-                            : "bg-white text-gray-900 border border-gray-200"
-                        }`}
+                        className={`px-4 py-2 rounded-lg ${isAdmin
+                          ? "bg-blue-500 text-white"
+                          : "bg-white text-gray-900 border border-gray-200"
+                          }`}
                       >
                         <p className="text-sm">{message.message}</p>
                         <p
-                          className={`text-xs mt-1 ${
-                            isAdmin ? "text-blue-100" : "text-gray-500"
-                          }`}
+                          className={`text-xs mt-1 ${isAdmin ? "text-blue-100" : "text-gray-500"
+                            }`}
                         >
                           {formatTime(message.createdAt)}
                         </p>
@@ -249,7 +276,8 @@ const ChatDetail = () => {
         </form>
       </div>
     </div>
-  );
+  )
 };
+
 
 export default ChatDetail;

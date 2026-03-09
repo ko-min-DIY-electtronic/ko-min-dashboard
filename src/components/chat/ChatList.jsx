@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, Clock, User } from "lucide-react";
+import io from "socket.io-client";
 import { getConversations } from "../../api/chatApi/getConversations";
 import Loading from "../utli/Loading";
+
+const socket = io.connect(import.meta.env.VITE_APP_WEBSOCKET_API, {
+  transports: ["websocket"],
+  secure: true,
+});
 
 const ChatList = () => {
   const navigate = useNavigate();
@@ -14,6 +20,53 @@ const ChatList = () => {
   useEffect(() => {
     fetchConversations();
   }, [currentPage]);
+
+  // ── Socket: listen for new messages to update the list in real-time ──
+  useEffect(() => {
+    socket.connect();
+    socket.emit('admin:join', 'admin');
+
+    console.log("socket connected", socket.connected);
+
+    socket.on("admin:new_message", (data) => {
+      console.log("New chat message received:", data);
+      const { conversation, message, conversationId } = data;
+
+      // Extract details safely, supporting both new format and potentially old format
+      const lastMessage = conversation?.lastMessage || message?.message || data.message;
+      const lastMessageAt = conversation?.lastMessageAt || message?.createdAt || data.createdAt || new Date().toISOString();
+      const isRead = conversation ? conversation.isRead : false;
+
+      setConversations((prev) => {
+        const idToFind = conversationId || conversation?._id || data.conversationId;
+        const existingIndex = prev.findIndex((c) => c._id === idToFind);
+
+        if (existingIndex !== -1) {
+          // Conversation exists — update & move to top
+          const updated = [...prev];
+          const [conv] = updated.splice(existingIndex, 1);
+
+          // Update existing conversation state with new data from payload
+          const updatedConv = {
+            ...conv,
+            lastMessage: lastMessage,
+            lastMessageAt: lastMessageAt,
+            isRead: isRead,
+          };
+
+          return [updatedConv, ...updated];
+        } else {
+          // New conversation (not in current list) — re-fetch to get full conversation data
+          fetchConversations();
+          return prev;
+        }
+      });
+    });
+
+    return () => {
+      socket.off("admin:new_message");
+    };
+  }, []);
 
   const fetchConversations = async () => {
     try {
