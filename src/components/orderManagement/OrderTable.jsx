@@ -212,8 +212,9 @@ const OrderTable = ({
                 orders.map((order, index) => (
                   <tr
                     key={order._id}
-                    className={`${activeOrder === order._id ? "bg-primary/10" : ""
-                      }`}
+                    className={`${
+                      activeOrder === order._id ? "bg-primary/10" : ""
+                    }`}
                   >
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       {index + 1}
@@ -228,7 +229,7 @@ const OrderTable = ({
                       <span>{order?.delivery?.township}</span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span>{order?.totalAmount?.toLocaleString()}</span>
+                      <span>{order?.finalAmount?.toLocaleString()} MMK</span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       <span>{order?.status}</span>
@@ -320,7 +321,7 @@ const OrderTable = ({
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
             className="absolute inset-0 bg-black opacity-50"
-          // onClick={onClose}
+            // onClick={onClose}
           ></div>
           <div className="h-screen flex justify-center items-center z-100">
             <div className="bg-white p-6 rounded-lg w-[500px] absolute z-100 opacity-100">
@@ -357,10 +358,11 @@ const OrderTable = ({
                   disabled={
                     inputValue !== selectedOrder?.snapshotData.customerName
                   }
-                  className={`px-5 py-2.5 rounded-lg flex items-center space-x-2 transition-colors duration-200 ${inputValue !== selectedOrder?.snapshotData.customerName
+                  className={`px-5 py-2.5 rounded-lg flex items-center space-x-2 transition-colors duration-200 ${
+                    inputValue !== selectedOrder?.snapshotData.customerName
                       ? "bg-red-300 cursor-not-allowed"
                       : "bg-red-600 text-white hover:bg-red-700"
-                    }`}
+                  }`}
                 >
                   <Trash2 className="w-5 h-5" />
                   <span>Delete Order</span>

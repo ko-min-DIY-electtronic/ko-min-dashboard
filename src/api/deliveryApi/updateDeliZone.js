@@ -34,7 +34,7 @@ const updateDeliZone = async (id, newData, originalData) => {
 
   const toastId = toast.loading("Updating delivery configuration...");
   try {
-    const response = await axios.patch(`api/v1/delivery/${id}`, changedData);
+    const response = await axios.patch(`delivery/${id}`, changedData);
     toast.success("Delivery configuration updated successfully!", {
       id: toastId,
       autoClose: 500,

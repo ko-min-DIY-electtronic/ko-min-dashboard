@@ -151,8 +151,8 @@ export default function OrderDetails() {
               </button>
             )}
 
-            <button
-              className="flex items-center gap-2 mr-4 bg-primary px-4 py-3 rounded-lg text-white hover:bg-primary/80"
+            {/* <button
+              className="flex items-center gap-2 mr-4 bg-primary px-4 py-3 rounded-full text-white hover:bg-primary/80"
               onClick={() => {
                 setIsOpen(true);
                 setIsEditOpen(true);
@@ -169,7 +169,7 @@ export default function OrderDetails() {
                 <path d="M480-240Zm-320 80v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q37 0 73 4.5t72 14.5l-67 68q-20-3-39-5t-39-2q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32h240v80H160Zm400 40v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-340L683-120H560Zm300-263-37-37 37 37ZM620-180h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19ZM480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm0-80q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Z" />
               </svg>
               Edit Customer Info
-            </button>
+            </button> */}
           </div>
           {/* </div> */}
         </div>
@@ -218,6 +218,17 @@ export default function OrderDetails() {
                         <div>
                           <span className="px-3 sm:px-4 py-2 text-[12px] rounded-full bg-[#FFF1C2] text-[#522504]">
                             {order?.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="font-semibold text-[14px] sm:text-[16px] mb-2">
+                          Payment Method
+                        </p>
+                        <div>
+                          <span className="px-3 sm:px-4 py-2 text-[12px] rounded-full bg-[#E8F5E8] text-[#2E7D32] capitalize">
+                            {order?.paymentMethod?.replace("-", " ")}
                           </span>
                         </div>
                       </div>
@@ -378,6 +389,10 @@ export default function OrderDetails() {
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-gray-900 text-sm">
+                            {item.unitPrice.toLocaleString()} MMK
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Qty: {item.quantity} ={" "}
                             {(item.unitPrice * item.quantity).toLocaleString()}{" "}
                             MMK
                           </p>
@@ -388,6 +403,7 @@ export default function OrderDetails() {
                         <span>
                           Weight: {item.unitWeight} {item.weightUnit}
                         </span>
+                        <span>Sale Type: {item.sale}</span>
                       </div>
                     </div>
                   </div>
@@ -407,7 +423,11 @@ export default function OrderDetails() {
                       {item.unitWeight} {item.weightUnit}
                     </div>
                     <div className="text-gray-900 text-sm text-right">
-                      {(item.unitPrice * item.quantity).toLocaleString()} MMK
+                      {item.unitPrice.toLocaleString()} MMK
+                      <div className="text-xs text-gray-500">
+                        Qty: {item.quantity} ={" "}
+                        {(item.unitPrice * item.quantity).toLocaleString()} MMK
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -422,7 +442,8 @@ export default function OrderDetails() {
                         Delivery Fee
                       </span>
                       <span className="text-gray-900 text-sm font-semibold">
-                        {order?.delivery.baseDeliveryFee.toLocaleString()} MMK
+                        {order?.delivery.calculatedDeliveryFee.toLocaleString()}{" "}
+                        MMK
                       </span>
                     </div>
                   </div>
@@ -432,7 +453,7 @@ export default function OrderDetails() {
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="space-y-2">
                         <div className="text-gray-900 text-sm font-medium">
-                          Additional Kilo Fee
+                          Additional Weight Fee
                         </div>
                         <div className="text-xs text-gray-500">
                           (1000 MMK Per Kilo for weight over 2kg)
@@ -442,10 +463,7 @@ export default function OrderDetails() {
                             {order?.delivery.totalWeight} kg
                           </span>
                           <span className="text-gray-900 text-sm font-semibold">
-                            {(
-                              order?.delivery.additionalWeightCharge *
-                              order?.delivery.totalWeight
-                            ).toLocaleString()}{" "}
+                            {order?.delivery.additionalWeightCharge.toLocaleString()}{" "}
                             MMK
                           </span>
                         </div>
@@ -461,28 +479,18 @@ export default function OrderDetails() {
                       Delivery Fee
                     </div>
                     <div className="text-gray-900 text-sm text-right">
-                      {order?.delivery.baseDeliveryFee.toLocaleString()}
+                      {order?.delivery.calculatedDeliveryFee.toLocaleString()}
                       MMK
                     </div>
                   </div>
                   {/* Only show Additional Kilo Fee if weight > 2kg */}
                   {/* {order?.delivery.totalWeight > 2 && (
                     <div className="grid grid-cols-5 gap-2 sm:gap-4 mb-8">
-                      <div className="text-gray-900 text-sm font-medium col-span-3">
-                        Additional Kilo Fee <br />{" "}
-                        <span className="text-xs text-gray-500">
-                          (1000 MMK Per Kilo for weight over 2kg)
-                        </span>
-                      </div>
-                      <div className="text-gray-900 text-sm text-center">
-                        {order?.delivery.totalWeight}
-                        kg
+                      <div className="text-gray-900 text-sm font-medium col-span-4">
+                        Additional Weight Fee
                       </div>
                       <div className="text-gray-900 text-sm text-right">
-                        {(
-                          order?.delivery.additionalWeightCharge *
-                          order?.delivery.totalWeight
-                        ).toLocaleString()}
+                        {order?.delivery.additionalWeightCharge.toLocaleString()}
                         MMK
                       </div>
                     </div>
@@ -499,10 +507,7 @@ export default function OrderDetails() {
                         Total
                       </div>
                       <div className="text-gray-900 text-lg sm:text-xl font-bold">
-                        {(
-                          order?.totalAmount +
-                          order.delivery.calculatedDeliveryFee
-                        ).toLocaleString()}
+                        {(order?.finalAmount).toLocaleString()}
                         MMK
                       </div>
                     </div>

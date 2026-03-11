@@ -206,14 +206,14 @@ const BannerDetail = () => {
                       <p className="text-gray-900">{banner.eventTime}</p>
                     </div>
                   </div>
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Use Stock Image
                     </label>
                     <p className="text-gray-900">
                       {banner.useStockImage ? "Yes" : "No"}
                     </p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

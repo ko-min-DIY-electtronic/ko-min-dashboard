@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { createDeliveryConfig } from "./../../types/delivery";
+import { useEffect, useState } from "react";
 import { DeliveryConfigForm } from "./DeliConfigForm";
 import { DeliveryConfigCard } from "./DeliConfigCard";
-import { Plus, Search, Filter, ChevronDown } from "lucide-react";
+import { Plus, Search, ChevronDown } from "lucide-react";
 import getAllDeliverZone from "../../api/deliveryApi/getAllDeliZone";
 import updateDeliZone from "../../api/deliveryApi/updateDeliZone";
 import deleteDeliZone from "../../api/deliveryApi/deleteDeliZone";

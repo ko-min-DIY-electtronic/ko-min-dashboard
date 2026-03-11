@@ -7,9 +7,10 @@ export const DeliveryConfigForm = ({
   onSubmit,
   onCancel,
   initialData,
-  isEditing = false,
+  isEditing,
   refetch,
 }) => {
+  console.log(isEditing);
   const [formData, setFormData] = useState(() =>
     createDeliveryConfig(initialData),
   );
@@ -22,10 +23,6 @@ export const DeliveryConfigForm = ({
 
     if (!formData.city.trim()) {
       newErrors.city = "City is required";
-    }
-
-    if (!formData.township.trim()) {
-      newErrors.township = "Township is required";
     }
 
     if (formData.deliveryFee < 0) {
@@ -44,19 +41,26 @@ export const DeliveryConfigForm = ({
     // console.log(formData);
     const data = {
       city: formData.city,
-      township: formData.township,
       deliveryFee: formData.deliveryFee,
       additionalWeightCharge: formData.additionalWeightCharge,
       reachable: formData.reachable,
     };
 
     setIsSubmitting(true);
-    const response = await createDeliZone(data);
-    if (response.status === "success") {
-      onSubmit(response.data);
-      setIsSubmitting(false);
-      refetch();
+
+    if (isEditing) {
+      // For editing, call the parent's onSubmit function
+      await onSubmit(data);
+    } else {
+      // For creating new config, use createDeliZone API
+      const response = await createDeliZone(data);
+      if (response.status === "success") {
+        onSubmit(response.data);
+        setIsSubmitting(false);
+        refetch();
+      }
     }
+    setIsSubmitting(false);
   };
 
   const handleInputChange = (field, value) => {
@@ -113,25 +117,19 @@ export const DeliveryConfigForm = ({
               htmlFor="township"
               className="block text-sm font-semibold text-gray-700"
             >
-              Township *
+              Township (Read Only)
             </label>
             <input
               type="text"
               id="township"
               value={formData.township}
-              onChange={(e) => handleInputChange("township", e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.township
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
-              placeholder="Enter township name"
+              readOnly
+              className="w-full px-4 py-3 border rounded-lg font-medium bg-gray-100 text-gray-600 cursor-not-allowed"
+              placeholder="Township will not be updated"
             />
-            {errors.township && (
-              <p className="text-sm text-red-600 font-medium">
-                {errors.township}
-              </p>
-            )}
+            <p className="text-xs text-gray-500">
+              Township cannot be modified during edit
+            </p>
           </div>
         </div>
 
