@@ -180,7 +180,19 @@ const ChatList = () => {
                         </p>
                         <p className={`text-sm truncate ${!conversation.isRead ? "text-gray-900 font-bold" : "text-gray-600 font-normal"
                           }`}>
-                          {conversation.lastMessage}
+                          {conversation.lastMessage?.startsWith('http') ? (
+                            <span className="flex items-center gap-1.5 italic">
+                              {conversation.lastMessage.includes('chat-images') ? (
+                                <><span role="img" aria-label="photo">📷</span> Photo</>
+                              ) : conversation.lastMessage.includes('chat-voice') ? (
+                                <><span role="img" aria-label="voice">🎤</span> Voice message</>
+                              ) : (
+                                conversation.lastMessage
+                              )}
+                            </span>
+                          ) : (
+                            conversation.lastMessage
+                          )}
                         </p>
                       </div>
 

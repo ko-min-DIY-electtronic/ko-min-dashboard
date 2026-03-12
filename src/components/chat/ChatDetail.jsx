@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, User, Bot } from "lucide-react";
+import { ArrowLeft, Send, User, Bot, ImagePlus, Mic, Square, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { getConversationMessages, sendMessage } from "../../api/chatApi/chatMessages";
 import { markConversationAsRead } from "../../api/chatApi/getConversations";
@@ -23,6 +23,10 @@ const ChatDetail = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [pagination, setPagination] = useState({});
+  const [isRecording, setIsRecording] = useState(false);
+  const [recorder, setRecorder] = useState(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const timerRef = useRef(null);
 
   // ── Fetch messages + Socket: join room & listen ──────────────────────
   useEffect(() => {
@@ -94,14 +98,13 @@ const ChatDetail = () => {
 
     try {
       setSending(true);
-      const response = await sendMessage(id, newMessage.trim());
+      const text = newMessage.trim();
+      setNewMessage(""); // Clear early for better UX
+      const response = await sendMessage(id, text);
 
-      if (response.success) {
-        setNewMessage("");
-
-      } else {
+      if (!response.success) {
         toast.error("Failed to send message");
-        console.error("Failed to send message:", response.message);
+        setNewMessage(text); // Restore on failure
       }
     } catch (error) {
       toast.error("Error sending message");
@@ -109,6 +112,106 @@ const ChatDetail = () => {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || sending) return;
+
+    // Validate if it's an image
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    try {
+      setSending(true);
+      const response = await sendMessage(id, file);
+
+      if (response.success) {
+        return null;
+      } else {
+        toast.error("Failed to send image");
+      }
+    } catch (error) {
+      toast.error("Error sending image");
+      console.error("Error sending image:", error);
+    } finally {
+      setSending(false);
+      e.target.value = null; // Reset input
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(chunks, { type: "audio/m4a" });
+        const audioFile = new File([audioBlob], `voice-message-${Date.now()}.m4a`, { type: "audio/m4a" });
+        
+        try {
+          setSending(true);
+          const response = await sendMessage(id, audioFile);
+          if (!response.success) {
+            toast.error("Failed to send voice message");
+          }
+        } catch (error) {
+          toast.error("Error sending voice message");
+        } finally {
+          setSending(false);
+        }
+
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      setRecorder(mediaRecorder);
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingDuration(0);
+      
+      timerRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+      toast.error("Could not access microphone");
+    }
+  };
+
+  const stopRecording = () => {
+    if (recorder && recorder.state !== "inactive") {
+      recorder.stop();
+      clearInterval(timerRef.current);
+      setIsRecording(false);
+    }
+  };
+
+  const cancelRecording = () => {
+    if (recorder) {
+      recorder.onstop = () => {
+        setIsRecording(false);
+        setRecorder(null);
+        clearInterval(timerRef.current);
+      };
+      recorder.stop();
+      recorder.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const scrollToBottom = () => {
@@ -231,14 +334,40 @@ const ChatDetail = () => {
                       </div>
 
                       <div
-                        className={`px-4 py-2 rounded-lg ${isAdmin
-                          ? "bg-blue-500 text-white"
-                          : "bg-white text-gray-900 border border-gray-200"
+                        className={`rounded-lg overflow-hidden ${message.messageType === "image" || message.messageType === "voice"
+                            ? "p-0 bg-transparent"
+                            : `px-4 py-2 ${isAdmin ? "bg-blue-500 text-white" : "bg-white text-gray-900 border border-gray-200"}`
                           }`}
                       >
-                        <p className="text-sm">{message.message}</p>
+                        {message.messageType === "image" ? (
+                          <div className="space-y-1">
+                            <img
+                              src={message.message}
+                              alt="Shared"
+                              className="max-w-full rounded-md cursor-pointer hover:opacity-95 transition-opacity max-h-72 object-cover"
+                              onClick={() => window.open(message.message, "_blank")}
+                            />
+                          </div>
+                        ) : message.messageType === "voice" ? (
+                          <div className="flex items-center min-w-[240px]">
+                            <audio
+                              controls
+                              controlsList="nodownload"
+                              className="h-10 w-full"
+                            >
+                              <source src={message.message} type="audio/mpeg" />
+                              <source src={message.message} type="audio/mp4" />
+                              <source src={message.message} type="audio/x-m4a" />
+                              Your browser does not support audio.
+                            </audio>
+                          </div>
+                        ) : (
+                          <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+                        )}
                         <p
-                          className={`text-xs mt-1 ${isAdmin ? "text-blue-100" : "text-gray-500"
+                          className={`text-xs mt-1 ${message.messageType === "image" || message.messageType === "voice"
+                              ? "text-gray-500 px-2 pb-1"
+                              : isAdmin ? "text-blue-100" : "text-gray-500"
                             }`}
                         >
                           {formatTime(message.createdAt)}
@@ -254,29 +383,82 @@ const ChatDetail = () => {
         </div>
       </div>
 
-      {/* Message Input - Fixed */}
       <div className="bg-white border-t border-gray-200 px-6 py-4">
-        <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto">
-          <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                disabled={sending}
-              />
+        <div className="max-w-4xl mx-auto">
+          {isRecording ? (
+            <div className="flex items-center justify-between bg-blue-50 rounded-lg px-4 py-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-blue-700">Recording... {formatDuration(recordingDuration)}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={cancelRecording}
+                  className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                  title="Cancel"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={stopRecording}
+                  disabled={sending}
+                  className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                >
+                  <Send className="h-5 w-5" />
+                </button>
+              </div>
             </div>
-            <button
-              type="submit"
-              disabled={!newMessage.trim() || sending}
-              className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Send className="h-5 w-5" />
-            </button>
-          </div>
-        </form>
+          ) : (
+            <form onSubmit={handleSendMessage} className="flex items-center space-x-4">
+              <div className="flex-1 flex items-center space-x-2">
+                <input
+                  type="file"
+                  id="image-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  disabled={sending}
+                />
+                <label
+                  htmlFor="image-upload"
+                  className={`p-3 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors ${sending ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  title="Send Image"
+                >
+                  <ImagePlus className="h-5 w-5" />
+                </label>
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type your message..."
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  disabled={sending}
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                {!newMessage.trim() ? (
+                  <button
+                    type="button"
+                    onClick={startRecording}
+                    disabled={sending}
+                    className="p-3 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
+                    <Mic className="h-5 w-5" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!newMessage.trim() || sending}
+                    className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Send className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   )

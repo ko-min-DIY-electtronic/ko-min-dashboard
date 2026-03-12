@@ -18,9 +18,14 @@ export const getConversationMessages = async (
 
 export const sendMessage = async (conversationId, message) => {
   try {
-    const response = await axios.post(`/chat/message`, {
-      message,
-      conversationId,
+    const formData = new FormData();
+    formData.append("conversationId", conversationId);
+    formData.append("message", message);
+
+    const response = await axios.post(`/chat/message`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   } catch (error) {
