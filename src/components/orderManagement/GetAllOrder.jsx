@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import getAllOrders from "../../api/orderApi/getAllOrders";
 import OrderTable from "./OrderTable";
 import OrderInfo from "./OrderInfo";
-import { format } from "date-fns";
-import { DateRange } from "react-date-range";
-import { FaCalendarAlt } from "react-icons/fa";
-import "react-date-range/dist/styles.css"; // main style file
-import "react-date-range/dist/theme/default.css"; // theme css file
+import { DateRangePicker } from "../utli/DateRangePicker";
+import { MdRefresh } from "react-icons/md";
 // import io from "socket.io-client";
 import SearchBar from "../utli/SearchBar";
 import searchOrder from "../../api/orderApi/SearchOrder";
@@ -18,57 +16,55 @@ import Loading from "../utli/Loading";
 // });
 
 function GetAllOrder() {
-  const today = new Date();
-  const [loading, setLoading] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [startDate, setStartDate] = useState(
-    sessionStorage.getItem("startDate") || startOfDay(today),
-  );
-  const [endDate, setEndDate] = useState(
-    sessionStorage.getItem("endDate") || endOfDay(today),
-  );
+  // Initialize dates to today
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const navigate = useNavigate();
 
-  const handleDateRangeChange = (ranges) => {
-    setDateRange([
-      {
-        ...ranges.selection,
-        startDate: startOfDay(ranges.selection.startDate),
-        endDate: endOfDay(ranges.selection.endDate),
-      },
-    ]);
-  };
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      key: "selection",
-    },
-  ]);
+  const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [activeTab, setActiveTab] = useState("pending");
   const [activePage, setActivePage] = useState(1);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const ApplyDate = () => {
-    setStartDate(startOfDay(dateRange[0].startDate));
-    setEndDate(endOfDay(dateRange[0].endDate));
-    setShowDatePicker(false);
-    sessionStorage.setItem("startDate", dateRange[0].startDate);
-    sessionStorage.setItem("endDate", dateRange[0].endDate);
+  const handleDateRangeChange = (start, end) => {
+    setStartDate(start);
+    setEndDate(end);
   };
 
-  const getOrders = async () => {
-    setLoading(true);
-    const start = format(startDate, "yyyy-MM-dd");
-    const end = format(endDate, "yyyy-MM-dd");
+  const formatDateForAPI = (date) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
-    const response = await getAllOrders();
-    if (response.success) {
-      console.log(response);
-      setOrders(response.data.orders);
-      setTimeout(() => setLoading(false), 500);
-    } else if (response.success === false) {
-      navigate("/unauthorized");
+  const getOrders = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      const startDateStr = formatDateForAPI(startDate);
+      const endDateStr = formatDateForAPI(endDate);
+      
+      const response = await getAllOrders(startDateStr, endDateStr);
+      if (response.success) {
+        setOrders(response.data.orders);
+      } else if (response.success === false) {
+        navigate("/unauthorized");
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        setRefreshing(false);
+      }, 500);
     }
   };
 
@@ -153,69 +149,35 @@ function GetAllOrder() {
 
   return (
     <div className="px-4">
-      <div className="flex flex-col lg:flex-row items-center justify-between ">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-4">
         <h1 className="header ml-8 lg:ml-0">Order Management</h1>
 
-        {/* <div className="flex items-center justify-between gap-10 mt-5 lg:mt-0">
-          <div className="w-auto md:w-[400px]">
-            <SearchBar
-              onSearch={(name) => (!name ? getOrders() : null)}
-              placeholder="Search Customer Name"
-              onClick={searchFunction}
-            />
-          </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <SearchBar
+            onSearch={(name) => (!name ? getOrders() : null)}
+            placeholder="Search Customer Name"
+            onClick={searchFunction}
+          />
+          
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onChange={handleDateRangeChange}
+          />
+
           <button
-            onClick={() => {
-              setShowDatePicker(!showDatePicker);
-            }}
-            className="button button-color text-color border border-primary transition-all duration-300 w-auto"
+            onClick={() => getOrders(true)}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 h-10"
           >
-            <FaCalendarAlt className="text-color" />
-            {format(startDate, "MMMM d,yyyy") == format(endDate, "MMMM d,yyyy")
-              ? format(startDate, "dd-MM-yyyy")
-              : `${format(startDate, "dd-MM-yyyy")} - ${format(
-                  endDate,
-                  "dd-MM-yyyy",
-                )}`}
+            <MdRefresh
+              className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+            />
+            {refreshing ? "..." : "Refresh"}
           </button>
-        </div> */}
+        </div>
       </div>
 
-      {/* {showDatePicker && (
-        <div className="mb-4 bg-white rounded-lg shadow-md absolute right-0 z-10">
-          <DateRange
-            editableDateInputs={true}
-            onChange={handleDateRangeChange}
-            moveRangeOnFirstSelection={false}
-            ranges={dateRange}
-            className="p-4"
-          />
-          <div className="flex items-center justify-end gap-2 p-4">
-            <button
-              className="flex items-center w-24 justify-center py-3 button-color text-color  rounded-xl"
-              onClick={() => {
-                setShowDatePicker(false);
-                setDateRange([
-                  {
-                    ...dateRange[0],
-                    startDate: startOfDay(startDate),
-                    endDate: endOfDay(endDate),
-                  },
-                ]);
-              }}
-            >
-              Cancel
-            </button>
-
-            <button
-              className="flex items-center w-24 justify-center py-3 bg-primary text-white rounded-xl"
-              onClick={() => ApplyDate()}
-            >
-              <p>OK</p>
-            </button>
-          </div>
-        </div>
-      )} */}
 
       <div className="flex">
         <div

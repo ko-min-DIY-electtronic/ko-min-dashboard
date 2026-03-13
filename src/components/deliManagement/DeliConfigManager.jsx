@@ -6,6 +6,7 @@ import getAllDeliverZone from "../../api/deliveryApi/getAllDeliZone";
 import updateDeliZone from "../../api/deliveryApi/updateDeliZone";
 import deleteDeliZone from "../../api/deliveryApi/deleteDeliZone";
 import ConfirmModal from "../ui/ConfirmModal";
+import Modal from "../ui/Modal";
 
 export const DeliveryConfigManager = () => {
   const [configs, setConfigs] = useState([]);
@@ -122,7 +123,8 @@ export const DeliveryConfigManager = () => {
     });
   };
 
-  const handleCancelEdit = () => {
+  const closeForm = () => {
+    setShowForm(false);
     setEditingConfig(null);
   };
 
@@ -214,20 +216,24 @@ export const DeliveryConfigManager = () => {
           </div>
         </div>
 
-        {/* Form */}
-        {(showForm || editingConfig) && (
-          <div className="mb-8">
-            <DeliveryConfigForm
-              onSubmit={editingConfig ? handleUpdateConfig : handleAddConfig}
-              onCancel={
-                editingConfig ? handleCancelEdit : () => setShowForm(false)
-              }
-              initialData={editingConfig || undefined}
-              isEditing={!!editingConfig}
-              refetch={getDeliverZone}
-            />
-          </div>
-        )}
+        {/* Form Modal */}
+        <Modal
+          isOpen={showForm || !!editingConfig}
+          onClose={closeForm}
+          title={
+            editingConfig
+              ? "Edit Delivery Configuration"
+              : "Add New Configuration"
+          }
+        >
+          <DeliveryConfigForm
+            onSubmit={editingConfig ? handleUpdateConfig : handleAddConfig}
+            onCancel={closeForm}
+            initialData={editingConfig || undefined}
+            isEditing={!!editingConfig}
+            refetch={getDeliverZone}
+          />
+        </Modal>
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">

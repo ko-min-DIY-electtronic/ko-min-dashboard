@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import getUserDetail from "../api/userApi/getUserDetail";
+import updateUserBanStatus from "../api/userApi/updateUserBanStatus";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   MdArrowBack,
@@ -31,6 +32,16 @@ export default function UserDetail() {
     }
   };
 
+  const handleBanStatus = async (isBanned) => {
+    try {
+      await updateUserBanStatus(user._id, isBanned);
+      // Refresh user data to show updated status
+      fetchUserDetail();
+    } catch (error) {
+      console.error("Error updating ban status:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUserDetail();
   }, [id]);
@@ -48,16 +59,9 @@ export default function UserDetail() {
         </span>
       );
     }
-    if (user.isVerified) {
-      return (
-        <span className="px-4 py-2 text-sm rounded-full bg-green-100 text-green-800">
-          Verified
-        </span>
-      );
-    }
     return (
       <span className="px-4 py-2 text-sm rounded-full bg-yellow-100 text-yellow-800">
-        Unverified
+        Active
       </span>
     );
   };
@@ -71,9 +75,8 @@ export default function UserDetail() {
 
     return (
       <span
-        className={`px-4 py-2 text-sm rounded-full ${
-          roleColors[role] || "bg-gray-100 text-gray-800"
-        }`}
+        className={`px-4 py-2 text-sm rounded-full ${roleColors[role] || "bg-gray-100 text-gray-800"
+          }`}
       >
         {role?.charAt(0).toUpperCase() + role?.slice(1)}
       </span>
@@ -94,14 +97,11 @@ export default function UserDetail() {
             <MdArrowBack size={24} onClick={() => navigate("/users")} />
             <h1 className="header text-xl sm:text-2xl">User Details</h1>
           </div>
-          {/* <div className="flex gap-2 items-center w-full sm:w-auto">
+          <div className="flex gap-2 items-center w-full sm:w-auto">
             {user.isBanned ? (
               <button
                 className="flex items-center gap-2 w-full sm:w-auto border border-green-500 px-3 sm:px-4 py-2 sm:py-3 rounded-3xl text-green-500 hover:bg-green-500 hover:text-white transition-colors duration-300 text-sm sm:text-[16px]"
-                onClick={() => {
-                  // Handle unban user
-                  console.log("Unban user:", user._id);
-                }}
+                onClick={() => handleBanStatus(false)}
               >
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">Unban User</span>
@@ -110,17 +110,14 @@ export default function UserDetail() {
             ) : (
               <button
                 className="flex items-center gap-2 w-full sm:w-auto border border-red-500 px-3 sm:px-4 py-2 sm:py-3 rounded-3xl text-red-500 hover:bg-red-500 hover:text-white transition-colors duration-300 text-sm sm:text-[16px]"
-                onClick={() => {
-                  // Handle ban user
-                  console.log("Ban user:", user._id);
-                }}
+                onClick={() => handleBanStatus(true)}
               >
                 <ShieldOff className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">Ban User</span>
                 <span className="sm:hidden">Ban</span>
               </button>
             )}
-          </div> */}
+          </div>
         </div>
 
         <div>
@@ -150,12 +147,12 @@ export default function UserDetail() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto">
-                      {/* <div>
+                      <div>
                         <p className="font-semibold text-[14px] sm:text-[16px] mb-2">
                           User Status
                         </p>
                         <div>{getStatusBadge(user)}</div>
-                      </div> */}
+                      </div>
 
                       <div>
                         <p className="font-semibold text-[14px] sm:text-[16px] mb-2">
@@ -182,7 +179,7 @@ export default function UserDetail() {
                       />
                     </div>
 
-                    <div>
+                    {/* <div>
                       <label htmlFor="lastActive" className="label">
                         Last Active
                       </label>
@@ -194,7 +191,7 @@ export default function UserDetail() {
                         value={formatDate(user.lastActiveAt)}
                         className="input-box text-xs sm:text-sm"
                       />
-                    </div>
+                    </div> */}
 
                     <div>
                       <label htmlFor="createdAt" className="label">
@@ -210,7 +207,7 @@ export default function UserDetail() {
                       />
                     </div>
 
-                    <div>
+                    {/* <div>
                       <label htmlFor="updatedAt" className="label">
                         Last Updated
                       </label>
@@ -222,7 +219,7 @@ export default function UserDetail() {
                         value={formatDate(user.updatedAt)}
                         className="input-box text-xs sm:text-sm"
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
@@ -306,7 +303,7 @@ export default function UserDetail() {
           </form>
 
           {/* User Statistics */}
-          <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 mt-6 sm:mt-10">
+          {/* <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 mt-6 sm:mt-10">
             <div className="flex justify-between items-center mb-6 sm:mb-8 pb-4">
               <h2 className="header text-xl sm:text-2xl">User Statistics</h2>
             </div>
@@ -371,7 +368,7 @@ export default function UserDetail() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -388,14 +388,47 @@ export default function OrderDetails() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-gray-900 text-sm">
-                            {item.unitPrice.toLocaleString()} MMK
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Qty: {item.quantity} ={" "}
-                            {(item.unitPrice * item.quantity).toLocaleString()}{" "}
-                            MMK
-                          </p>
+                          {item.isDiscounted ? (
+                            <>
+                              <div className="flex flex-col items-end">
+                                <span className="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded mb-1">
+                                  -{item.discountPercentage}%
+                                </span>
+                                <p className="text-xs text-gray-400 line-through">
+                                  {item.unitPrice.toLocaleString()} MMK
+                                </p>
+                                <p className="font-semibold text-primary text-sm">
+                                  {(
+                                    item.unitPrice *
+                                    (1 - item.discountPercentage / 100)
+                                  ).toLocaleString()}{" "}
+                                  MMK
+                                </p>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Qty: {item.quantity} ={" "}
+                                {(
+                                  item.unitPrice *
+                                  (1 - item.discountPercentage / 100) *
+                                  item.quantity
+                                ).toLocaleString()}{" "}
+                                MMK
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="font-semibold text-gray-900 text-sm">
+                                {item.unitPrice.toLocaleString()} MMK
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Qty: {item.quantity} ={" "}
+                                {(
+                                  item.unitPrice * item.quantity
+                                ).toLocaleString()}{" "}
+                                MMK
+                              </p>
+                            </>
+                          )}
                         </div>
                       </div>
                       <div className="flex justify-between text-xs text-gray-600">
@@ -423,11 +456,41 @@ export default function OrderDetails() {
                       {item.unitWeight} {item.weightUnit}
                     </div>
                     <div className="text-gray-900 text-sm text-right">
-                      {item.unitPrice.toLocaleString()} MMK
-                      <div className="text-xs text-gray-500">
-                        Qty: {item.quantity} ={" "}
-                        {(item.unitPrice * item.quantity).toLocaleString()} MMK
-                      </div>
+                      {item.isDiscounted ? (
+                        <div className="flex flex-col items-end">
+                          <span className="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded mb-1">
+                            -{item.discountPercentage}%
+                          </span>
+                          <span className="text-xs text-gray-400 line-through">
+                            {item.unitPrice.toLocaleString()} MMK
+                          </span>
+                          <span className="font-semibold text-primary">
+                            {(
+                              item.unitPrice *
+                              (1 - item.discountPercentage / 100)
+                            ).toLocaleString()}{" "}
+                            MMK
+                          </span>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Qty: {item.quantity} ={" "}
+                            {(
+                              item.unitPrice *
+                              (1 - item.discountPercentage / 100) *
+                              item.quantity
+                            ).toLocaleString()}{" "}
+                            MMK
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {item.unitPrice.toLocaleString()} MMK
+                          <div className="text-xs text-gray-500">
+                            Qty: {item.quantity} ={" "}
+                            {(item.unitPrice * item.quantity).toLocaleString()}{" "}
+                            MMK
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -436,6 +499,47 @@ export default function OrderDetails() {
               <div className="border-t border-gray-200 pt-4 mb-6">
                 {/* Mobile Layout for Fees */}
                 <div className="sm:hidden space-y-4">
+                  {/* Subtotal */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-900 text-sm font-medium">
+                        Subtotal
+                      </span>
+                      <span className="text-gray-900 text-sm font-semibold">
+                        {order?.subTotal.toLocaleString()} MMK
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tax - show if > 0 */}
+                  {order?.tax > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-900 text-sm font-medium">
+                          Tax
+                        </span>
+                        <span className="text-gray-900 text-sm font-semibold">
+                          {order?.tax.toLocaleString()} MMK
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Discount - show if > 0 */}
+                  {order?.discount > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex justify-between items-center text-red-600">
+                        <span className="text-sm font-medium">
+                          Discount
+                        </span>
+                        <span className="text-sm font-semibold">
+                          -{order?.discount.toLocaleString()} MMK
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Delivery Fee */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-900 text-sm font-medium">
@@ -473,28 +577,50 @@ export default function OrderDetails() {
                 </div>
 
                 {/* Desktop Layout for Fees */}
-                <div className="hidden sm:block">
-                  <div className="grid grid-cols-5 gap-2 sm:gap-4 mb-8">
+                <div className="hidden sm:block space-y-4">
+                  {/* Subtotal */}
+                  <div className="grid grid-cols-5 gap-2 sm:gap-4">
+                    <div className="text-gray-900 text-sm font-medium col-span-4">
+                      Subtotal
+                    </div>
+                    <div className="text-gray-900 text-sm text-right">
+                      {order?.subTotal.toLocaleString()} MMK
+                    </div>
+                  </div>
+
+                  {/* Tax */}
+                  {order?.tax > 0 && (
+                    <div className="grid grid-cols-5 gap-2 sm:gap-4">
+                      <div className="text-gray-900 text-sm font-medium col-span-4">
+                        Tax
+                      </div>
+                      <div className="text-gray-900 text-sm text-right">
+                        {order?.tax.toLocaleString()} MMK
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Discount */}
+                  {order?.discount > 0 && (
+                    <div className="grid grid-cols-5 gap-2 sm:gap-4 text-red-600">
+                      <div className="text-sm font-medium col-span-4">
+                        Discount
+                      </div>
+                      <div className="text-sm text-right font-semibold">
+                        -{order?.discount.toLocaleString()} MMK
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Delivery Fee */}
+                  <div className="grid grid-cols-5 gap-2 sm:gap-4">
                     <div className="text-gray-900 text-sm font-medium col-span-4">
                       Delivery Fee
                     </div>
                     <div className="text-gray-900 text-sm text-right">
-                      {order?.delivery.calculatedDeliveryFee.toLocaleString()}
-                      MMK
+                      {order?.delivery.calculatedDeliveryFee.toLocaleString()} MMK
                     </div>
                   </div>
-                  {/* Only show Additional Kilo Fee if weight > 2kg */}
-                  {/* {order?.delivery.totalWeight > 2 && (
-                    <div className="grid grid-cols-5 gap-2 sm:gap-4 mb-8">
-                      <div className="text-gray-900 text-sm font-medium col-span-4">
-                        Additional Weight Fee
-                      </div>
-                      <div className="text-gray-900 text-sm text-right">
-                        {order?.delivery.additionalWeightCharge.toLocaleString()}
-                        MMK
-                      </div>
-                    </div>
-                  )} */}
                 </div>
               </div>
 
