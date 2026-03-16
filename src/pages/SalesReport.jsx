@@ -12,6 +12,10 @@ import {
   MdCalendarToday,
   MdCalendarViewWeek,
   MdCalendarViewMonth,
+  MdPayment,
+  MdCheckCircle,
+  MdPending,
+  MdCancel,
 } from "react-icons/md";
 
 // Helper function to get today's date
@@ -33,6 +37,7 @@ export default function SalesReport() {
     return thirtyDaysAgo;
   });
   const [endDate, setEndDate] = useState(getToday());
+  const [paymentMethod, setPaymentMethod] = useState("");
 
   const formatDateForAPI = (date) => {
     if (!date) return null;
@@ -72,11 +77,12 @@ export default function SalesReport() {
     try {
       const startDateStr = formatDateForAPI(startDate);
       const endDateStr = formatDateForAPI(endDate);
-      console.log("Fetching sales report with dates:", {
+      console.log("Fetching sales report with params:", {
         startDateStr,
         endDateStr,
+        paymentMethod,
       });
-      const response = await getSalesReport(startDateStr, endDateStr);
+      const response = await getSalesReport(startDateStr, endDateStr, paymentMethod);
       console.log("res", response);
       setSalesReport(response);
     } catch (error) {
@@ -93,11 +99,11 @@ export default function SalesReport() {
   }, []);
 
   useEffect(() => {
-    console.log("useEffect triggered with dates:", { startDate, endDate });
+    console.log("useEffect triggered with dates:", { startDate, endDate, paymentMethod });
     if (startDate && endDate) {
       fetchSalesReport();
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, paymentMethod]);
 
   const handleDateRangeChange = (start, end) => {
     console.log("Date range changed:", { start, end });
@@ -184,6 +190,17 @@ export default function SalesReport() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
+            {/* Payment Method Filter */}
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 min-w-[160px]"
+            >
+              <option value="">All Payment Methods</option>
+              <option value="cash-on-delivery">Cash on Delivery</option>
+              <option value="k-pay">K Pay</option>
+            </select>
+
             {/* Date Range Picker */}
             <DateRangePicker
               startDate={startDate}
@@ -235,10 +252,10 @@ export default function SalesReport() {
               color="bg-yellow-100"
             />
             <StatCard
-              title="Cash Down Payments"
+              title="Cash on Delivery"
               value={
                 salesReport?.data?.overview?.byPaymentMethodObject?.[
-                  "cash-down"
+                  "cash-on-delivery"
                 ]?.count || 0
               }
               icon={MdLocalShipping}
@@ -246,161 +263,95 @@ export default function SalesReport() {
             />
           </div>
 
-          {/* Sales by Date */}
-
-          {/* Recent Orders */}
-        </div>
-
-        {/* Performance Summary */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            Performance Summary
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <TimePeriodCard
-              period={analytics?.performanceSummary?.today}
-              data={analytics?.performanceSummary?.today || {}}
-              icon={MdCalendarToday}
-              periodLabel="Today"
-            />
-            <TimePeriodCard
-              period={analytics?.performanceSummary?.week}
-              data={analytics?.performanceSummary?.week || {}}
-              icon={MdCalendarViewWeek}
-              periodLabel="This Week"
-            />
-            <TimePeriodCard
-              period={analytics?.performanceSummary?.month}
-              data={analytics?.performanceSummary?.month || {}}
-              icon={MdCalendarViewMonth}
-              periodLabel="This Month"
-            />
-          </div>
-        </div>
-
-        {/* Product Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Most Sold Product */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <MdTrendingUp className="w-5 h-5 text-green-700" />
+          {/* Detailed Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mt-4">
+            {/* By Payment Method */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-indigo-100 rounded-lg">
+                  <MdPayment className="w-5 h-5 text-indigo-700" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Payment Methods
+                </h3>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Most Sold Product
-              </h3>
+              <div className="space-y-4">
+                {salesReport?.data?.overview?.byPaymentMethod?.map((method, idx) => (
+                  <div key={idx} className="border border-gray-100 rounded-lg p-4 bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium text-gray-900 capitalize">
+                        {method.paymentMethod.replace(/-/g, " ")}
+                      </span>
+                      <span className="font-bold text-gray-900">
+                        {formatCurrency(method.totalAmount)} MMK
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-500 mb-3">
+                      <span>{method.count} Orders</span>
+                      <span>Avg: {formatCurrency(method.avgOrderValue || 0)} MMK</span>
+                    </div>
+
+                    {/* Progress Bar for Success Rate */}
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                      <div
+                        className={`h-2 rounded-full ${method.successRate > 75 ? 'bg-green-500' : method.successRate > 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                        style={{ width: `${method.successRate || 0}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>Success Rate</span>
+                      <span>{method.successRate || 0}%</span>
+                    </div>
+                  </div>
+                ))}
+                {!salesReport?.data?.overview?.byPaymentMethod?.length && (
+                  <p className="text-center text-gray-500 py-4">No data available</p>
+                )}
+              </div>
             </div>
 
-            {analytics?.mostSoldProduct ? (
-              <div className="p-4 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium text-gray-900">
-                    {analytics.mostSoldProduct.name}
-                  </p>
-                  <span className="text-sm text-green-600 font-medium">
-                    {analytics.mostSoldProduct.totalSold} sold
-                  </span>
+            {/* By Status */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <MdTrendingUp className="w-5 h-5 text-blue-700" />
                 </div>
-                <p className="text-sm text-gray-600">
-                  Category: {analytics.mostSoldProduct.category}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Product Code: {analytics.mostSoldProduct.productCode}
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Order Status
+                </h3>
               </div>
-            ) : (
-              <div className="p-8 text-center text-gray-500">
-                <MdShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No sales data available</p>
-              </div>
-            )}
-          </div>
+              <div className="space-y-4">
+                {salesReport?.data?.overview?.byStatus?.map((statusObj, idx) => {
+                  const isConfirmed = statusObj.status === "confirmed" || statusObj.status === "delivered";
+                  const isPending = statusObj.status === "pending";
 
-          {/* Least Sold Product */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <MdTrendingUp className="w-5 h-5 text-red-700 rotate-180" />
+                  return (
+                    <div key={idx} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className={`p-2 rounded-full ${isConfirmed ? 'bg-green-100 text-green-700' : isPending ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                          {isConfirmed ? <MdCheckCircle className="w-5 h-5" /> : isPending ? <MdPending className="w-5 h-5" /> : <MdCancel className="w-5 h-5" />}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 capitalize">{statusObj.status}</p>
+                          <p className="text-sm text-gray-500">{statusObj.count} Orders</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900">{formatCurrency(statusObj.totalAmount)}</p>
+                        <p className="text-xs text-gray-500">MMK</p>
+                      </div>
+                    </div>
+                  )
+                })}
+                {!salesReport?.data?.overview?.byStatus?.length && (
+                  <p className="text-center text-gray-500 py-4">No data available</p>
+                )}
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Least Sold Product
-              </h3>
             </div>
-
-            {analytics?.leastSoldProduct ? (
-              <div className="p-4 bg-red-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium text-gray-900">
-                    {analytics.leastSoldProduct.name}
-                  </p>
-                  <span className="text-sm text-red-600 font-medium">
-                    {analytics.leastSoldProduct.totalSold} sold
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  Category: {analytics.leastSoldProduct.category}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Product Code: {analytics.leastSoldProduct.productCode}
-                </p>
-              </div>
-            ) : (
-              <div className="p-8 text-center text-gray-500">
-                <MdShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No sales data available</p>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Quick Stats */}
-        {/* <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            Quick Stats
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              title="Total Orders (All Time)"
-              value={formatCurrency(
-                (analytics?.performanceSummary?.today?.orderCount || 0) +
-                  (analytics?.performanceSummary?.week?.orderCount || 0) +
-                  (analytics?.performanceSummary?.month?.orderCount || 0)
-              )}
-              icon={MdShoppingCart}
-              color="bg-blue-100"
-            />
-            <StatCard
-              title="Total Sales (All Time)"
-              value={`${formatCurrency(
-                (analytics?.performanceSummary?.today?.totalSale || 0) +
-                  (analytics?.performanceSummary?.week?.totalSale || 0) +
-                  (analytics?.performanceSummary?.month?.totalSale || 0)
-              )} MMK`}
-              icon={MdTrendingUp}
-              color="bg-green-100"
-            />
-            <StatCard
-              title="Total Delivery Fees"
-              value={`${formatCurrency(
-                (analytics?.performanceSummary?.today?.totalDeliveryFee || 0) +
-                  (analytics?.performanceSummary?.week?.totalDeliveryFee || 0) +
-                  (analytics?.performanceSummary?.month?.totalDeliveryFee || 0)
-              )} MMK`}
-              icon={MdLocalShipping}
-              color="bg-purple-100"
-            />
-            <StatCard
-              title="New Customers"
-              value={formatCurrency(
-                (analytics?.performanceSummary?.today?.newCustomers || 0) +
-                  (analytics?.performanceSummary?.week?.newCustomers || 0) +
-                  (analytics?.performanceSummary?.month?.newCustomers || 0)
-              )}
-              icon={MdPersonAdd}
-              color="bg-orange-100"
-            />
-          </div>
-        </div> */}
+
       </div>
     </div>
   );
