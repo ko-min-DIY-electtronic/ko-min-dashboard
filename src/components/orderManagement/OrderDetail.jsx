@@ -612,10 +612,33 @@ export default function OrderDetails() {
                     </div>
                   )}
 
+                  {/* Additional Weight Charge */}
+                  {order?.delivery?.totalWeight > 2 && (
+                    <div className="flex flex-col gap-4 border-b pb-5">
+                      <div className="grid grid-cols-5 gap-2 sm:gap-4">
+                        <div className="text-gray-900 text-sm font-medium col-span-4">
+                          Additional Weight Charge
+                        </div>
+                        <div className="text-gray-900 text-sm text-right">
+                          {order?.delivery.additionalWeightCharge.toLocaleString()} MMK
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-5 gap-2 sm:gap-4">
+                        <div className="text-gray-900 text-sm font-medium col-span-4">
+                          Delivery Fee
+                        </div>
+                        <div className="text-gray-900 text-sm text-right">
+                          {order?.delivery.baseDeliveryFee.toLocaleString()} MMK
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Delivery Fee */}
                   <div className="grid grid-cols-5 gap-2 sm:gap-4">
                     <div className="text-gray-900 text-sm font-medium col-span-4">
-                      Delivery Fee
+                      {order?.delivery?.totalWeight > 2 ? "Total Delivery Fee" : "Delivery Fee"}
                     </div>
                     <div className="text-gray-900 text-sm text-right">
                       {order?.delivery.calculatedDeliveryFee.toLocaleString()} MMK

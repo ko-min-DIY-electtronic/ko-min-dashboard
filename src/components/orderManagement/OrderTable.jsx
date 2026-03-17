@@ -26,7 +26,7 @@ const OrderTable = ({
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Pending Orders");
+  const [activeTab, setActiveTab] = useState("Confirm Orders");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [deleteModal, setDeleteModal] = useState(false);

@@ -19,14 +19,16 @@ function GetAllOrder() {
   // Initialize dates to today
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [paymentMethod, setPaymentMethod] = useState("");
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [activeTab, setActiveTab] = useState("pending");
+  const [activeTab, setActiveTab] = useState("confirmed");
   const [activePage, setActivePage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleDateRangeChange = (start, end) => {
     setStartDate(start);
@@ -52,7 +54,7 @@ function GetAllOrder() {
       const startDateStr = formatDateForAPI(startDate);
       const endDateStr = formatDateForAPI(endDate);
       
-      const response = await getAllOrders(startDateStr, endDateStr);
+      const response = await getAllOrders(startDateStr, endDateStr, activeTab, paymentMethod);
       if (response.success) {
         setOrders(response.data.orders);
       } else if (response.success === false) {
@@ -92,23 +94,18 @@ function GetAllOrder() {
     setActivePage(page);
   };
 
-  const searchFunction = async (name) => {
-    const response = await searchOrder(name);
-    const filterOrder = response.data.filter((item) => {
-      return item.deliveryStatus === activeTab;
-    });
-    const orderArray = filterOrder.map((item) => {
-      return {
-        _id: item._id,
-        snapshotData: { ...item },
-      };
-    });
-    setOrders(orderArray);
+  const searchFunction = (name) => {
+    setSearchTerm(name);
   };
+
+  const filteredOrders = orders.filter((order) => {
+    const customerName = order?.userId?.userName || "";
+    return customerName.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   useEffect(() => {
     getOrders();
-  }, [activeTab, startDate, endDate]);
+  }, [activeTab, startDate, endDate, paymentMethod]);
 
   // useEffect(() => {
   //   // Connection established
@@ -154,7 +151,7 @@ function GetAllOrder() {
 
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <SearchBar
-            onSearch={(name) => (!name ? getOrders() : null)}
+            onSearch={(name) => searchFunction(name)}
             placeholder="Search Customer Name"
             onClick={searchFunction}
           />
@@ -164,6 +161,16 @@ function GetAllOrder() {
             endDate={endDate}
             onChange={handleDateRangeChange}
           />
+
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary h-10 bg-white"
+          >
+            <option value="">All Payments</option>
+            <option value="k-pay">K-Pay</option>
+            <option value="cash-on-delivery">Cash on Delivery</option>
+          </select>
 
           <button
             onClick={() => getOrders(true)}
@@ -186,7 +193,7 @@ function GetAllOrder() {
           }`}
         >
           <OrderTable
-            orders={orders}
+            orders={filteredOrders}
             passOrder={passOrder}
             activeOrder={selectedOrder}
             passTab={passTab}

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 const getSalesReport = async (startDate, endDate, paymentMethod = "") => {
   const toastId = toast.loading("Loading sales report...");
   try {
-    let url = `report/sales?startDate=${startDate}&endDate=${endDate}`;
+    let url = `report/sales?startDate=${startDate}&endDate=${endDate}&status=confirmed`;
     if (paymentMethod) {
       url += `&paymentMethod=${paymentMethod}`;
     }

@@ -12,6 +12,10 @@ const updateDeliZone = async (id, newData, originalData) => {
     changedData.city = newData.city;
   }
 
+  if (newData.township !== originalData.township) {
+    changedData.township = newData.township;
+  }
+
   if (newData.deliveryFee !== originalData.deliveryFee) {
     changedData.deliveryFee = newData.deliveryFee;
   }
