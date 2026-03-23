@@ -6,9 +6,9 @@ const getAllOrders = async (startDate, endDate, status, paymentMethod) => {
     const params = new URLSearchParams();
     if (startDate) params.append("startDate", startDate);
     if (endDate) params.append("endDate", endDate);
-    if (status) params.append("status", status);
+    // if (status) params.append("status", status);
     if (paymentMethod) params.append("paymentMethod", paymentMethod);
-    
+
     const queryString = params.toString();
     if (queryString) {
       url += `?${queryString}`;
