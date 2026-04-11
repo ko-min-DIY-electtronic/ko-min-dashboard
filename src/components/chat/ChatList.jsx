@@ -142,8 +142,8 @@ const ChatList = () => {
                 key={conversation._id}
                 onClick={() => handleConversationClick(conversation._id)}
                 className={`p-4 hover:bg-gray-100 transition-colors cursor-pointer border-l-4 ${!conversation.isRead
-                    ? "bg-blue-50/40 border-blue-500 shadow-sm"
-                    : "bg-white border-transparent"
+                  ? "bg-blue-50/40 border-blue-500 shadow-sm"
+                  : "bg-white border-transparent"
                   }`}
               >
                 <div className="flex items-start space-x-4">
@@ -165,7 +165,7 @@ const ChatList = () => {
                     <div className="flex items-center justify-between mb-1">
                       <h3 className={`text-sm tracking-tight truncate ${!conversation.isRead ? "font-bold text-gray-900" : "font-medium text-gray-700"
                         }`}>
-                        {conversation.userId.userName}
+                        {conversation?.userId?.userName}
                       </h3>
                       <span className={`text-xs ${!conversation.isRead ? "text-blue-600 font-bold" : "text-gray-500"
                         }`}>
@@ -176,7 +176,7 @@ const ChatList = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <p className="text-xs text-gray-400 mb-1">
-                          {conversation.userId.phoneNumber}
+                          {conversation?.userId?.phoneNumber}
                         </p>
                         <p className={`text-sm truncate ${!conversation.isRead ? "text-gray-900 font-bold" : "text-gray-600 font-normal"
                           }`}>
