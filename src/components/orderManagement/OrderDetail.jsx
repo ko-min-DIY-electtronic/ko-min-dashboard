@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import getReceiptImage from "../../api/receipt/getReceiptIamge";
 import UpdateModel from "./UpdateModel";
 import chgOrderStatus from "../../api/orderApi/chgOrderStatus";
-import { MdArrowBack, MdOutlinePhone } from "react-icons/md";
+import { MdArrowBack, MdOutlinePhone, MdLocalShipping, MdCheckCircle, MdCheck, MdCancel } from "react-icons/md";
 import Loading from "../utli/Loading";
 import avatar from "../../assets/Oval.png";
 
@@ -110,66 +110,46 @@ export default function OrderDetails() {
           {/* <div className="flex gap-2 items-center"> */}
           {/* <div className="flex gap-2 items-center"></div> */}
 
-          <div className="flex gap-2 items-center">
-            {order.status !== "cancelled" && (
+          <div className="flex flex-wrap gap-2 items-center">
+            {order.status !== "cancelled" && order.status !== "success" && (
               <button
-                className="flex items-center gap-2 mr-4 border border-primary px-4 py-3 rounded-3xl text-primary hover:bg-primary/20 transition-colors duration-300 text-[16px]"
-                onClick={() => {
-                  chgStatus("cancelled");
-                }}
+                className="flex items-center gap-2 border border-primary px-4 py-3 rounded-3xl text-primary hover:bg-primary/10 transition-all duration-300 text-[15px] font-medium"
+                onClick={() => chgStatus("cancelled")}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="18px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="currentColor"
-                >
-                  <path d="m760-183-85 84-56-56 84-85-84-85 56-56 85 84 85-84 56 56-84 85 84 85-56 56-85-84ZM240-80q-50 0-85-35t-35-85v-120h120v-560h600v415q-19-7-39-10.5t-41-3.5v-321H320v480h214q-7 19-10.5 39t-3.5 41H200v40q0 17 11.5 28.5T240-160h294q8 23 20 43t28 37H240Zm120-520v-80h360v80H360Zm0 120v-80h360v80H360Zm174 320H200h334Z" />
-                </svg>
+                <MdCancel size={20} />
                 Order Cancel
               </button>
             )}
 
-            {order.status !== "confirmed" && (
+            {order.status === "pending" && (
               <button
-                className="flex items-center gap-2 mr-4 border border-primary px-4 py-3 rounded-3xl text-white bg-primary hover:bg-primary/80 transition-colors duration-300 text-[16px]"
-                onClick={() => {
-                  chgStatus("confirmed");
-                }}
+                className="flex items-center gap-2 border border-primary px-5 py-3 rounded-3xl text-white bg-primary hover:bg-primary/90 transition-all duration-300 text-[15px] font-medium shadow-sm hover:shadow-md"
+                onClick={() => chgStatus("confirmed")}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="18px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="currentColor"
-                >
-                  <path d="m760-183-85 84-56-56 84-85-84-85 56-56 85 84 85-84 56 56-84 85 84 85-56 56-85-84ZM240-80q-50 0-85-35t-35-85v-120h120v-560h600v415q-19-7-39-10.5t-41-3.5v-321H320v480h214q-7 19-10.5 39t-3.5 41H200v40q0 17 11.5 28.5T240-160h294q8 23 20 43t28 37H240Zm120-520v-80h360v80H360Zm0 120v-80h360v80H360Zm174 320H200h334Z" />
-                </svg>
+                <MdCheck size={20} />
                 Confirm Order
               </button>
             )}
 
-            {/* <button
-              className="flex items-center gap-2 mr-4 bg-primary px-4 py-3 rounded-full text-white hover:bg-primary/80"
-              onClick={() => {
-                setIsOpen(true);
-                setIsEditOpen(true);
-                setProduct(order);
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#fff"
+            {order.status === "confirmed" && (
+              <button
+                className="flex items-center gap-2 border border-primary px-5 py-3 rounded-3xl text-white bg-primary hover:bg-primary/90 transition-all duration-300 text-[15px] font-medium shadow-sm hover:shadow-md"
+                onClick={() => chgStatus("on-delivery")}
               >
-                <path d="M480-240Zm-320 80v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q37 0 73 4.5t72 14.5l-67 68q-20-3-39-5t-39-2q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32h240v80H160Zm400 40v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-340L683-120H560Zm300-263-37-37 37 37ZM620-180h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19ZM480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm0-80q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Z" />
-              </svg>
-              Edit Customer Info
-            </button> */}
+                <MdLocalShipping size={20} />
+                On Delivery
+              </button>
+            )}
+
+            {order.status === "on-delivery" && (
+              <button
+                className="flex items-center gap-2 border border-primary px-5 py-3 rounded-3xl text-white bg-primary hover:bg-primary/90 transition-all duration-300 text-[15px] font-medium shadow-sm hover:shadow-md"
+                onClick={() => chgStatus("success")}
+              >
+                <MdCheckCircle size={20} />
+                Mark as Success
+              </button>
+            )}
           </div>
           {/* </div> */}
         </div>

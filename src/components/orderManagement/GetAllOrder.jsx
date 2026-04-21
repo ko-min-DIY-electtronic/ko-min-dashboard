@@ -23,9 +23,10 @@ function GetAllOrder() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [activeTab, setActiveTab] = useState("confirmed");
+  const [activeTab, setActiveTab] = useState("");
   const [activePage, setActivePage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,10 +64,9 @@ function GetAllOrder() {
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
-      setTimeout(() => {
-        setLoading(false);
-        setRefreshing(false);
-      }, 500);
+      setLoading(false);
+      setRefreshing(false);
+      setIsInitialLoad(false);
     }
   };
 
@@ -140,7 +140,7 @@ function GetAllOrder() {
   //   };
   // }, []);
 
-  if (loading) {
+  if (isInitialLoad && loading) {
     return <Loading />;
   }
 
@@ -161,6 +161,19 @@ function GetAllOrder() {
             endDate={endDate}
             onChange={handleDateRangeChange}
           />
+
+          <select
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary h-10 bg-white capitalize"
+          >
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="on-delivery">On Delivery</option>
+            <option value="success">Success</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
 
           <select
             value={paymentMethod}

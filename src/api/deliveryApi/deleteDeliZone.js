@@ -5,7 +5,7 @@ const deleteDeliZone = async (id) => {
   console.log("Deleting delivery config:", id);
   const toastId = toast.loading("Deleting delivery configuration...");
   try {
-    const response = await axios.delete(`api/v1/delivery/${id}`);
+    const response = await axios.delete(`delivery/${id}`);
     toast.success("Delivery configuration deleted successfully!", {
       id: toastId,
       autoClose: 500,
