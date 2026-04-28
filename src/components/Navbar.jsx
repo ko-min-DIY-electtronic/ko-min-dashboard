@@ -142,13 +142,18 @@ function Navbar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border border-gray-200 rounded-lg shadow-lg"
-      >
-        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      {/* Mobile Top Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-30 flex items-center px-4 justify-between shadow-sm">
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Menu size={24} />
+          </button>
+          <span className="font-semibold text-lg text-gray-800">Dashboard</span>
+        </div>
+      </div>
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
@@ -161,21 +166,23 @@ function Navbar() {
       {/* Mobile Sidebar */}
       <div
         className={`
-        lg:hidden fixed left-0 top-0 h-[calc(100vh-55px)] w-64 bg-white border-r border-gray-200 z-40 transform transition-transform duration-300 ease-in-out
+        lg:hidden fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 ease-in-out flex flex-col
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
-        {/* Mobile Logo */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-end space-x-2">
-            {/* <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center"> */}
-            {/* <span className="text-white font-bold text-sm">VSOP</span> */}
-            {/* </div> */}
-          </div>
+        {/* Mobile Header & Close Button */}
+        <div className="flex items-center justify-between p-4 h-16 border-b border-gray-200 shrink-0">
+          <span className="font-semibold text-lg text-gray-800">Menu</span>
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* Mobile Navigation */}
-        <nav className="mt-6 px-4">
+        <nav className="flex-1 overflow-y-auto py-4 px-4">
           <ul className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -222,7 +229,7 @@ function Navbar() {
         </nav>
 
         {/* Mobile User Profile */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <div className="shrink-0 p-4 border-t border-gray-200 bg-white">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
               <User size={20} className="text-gray-600" />

@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 
 const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
-  console.log("category", category);
 
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
@@ -32,16 +31,7 @@ const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
     sentBulkPriceModal(stockIds);
   };
 
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedRows(new Set());
-      setSelectAll(false);
-    } else {
-      const allIds = new Set(category.map((item) => item.category));
-      setSelectedRows(allIds);
-      setSelectAll(true);
-    }
-  };
+
 
   const tabs = ["All Category"];
 

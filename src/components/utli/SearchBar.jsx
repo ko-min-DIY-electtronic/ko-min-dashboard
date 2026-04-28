@@ -29,7 +29,7 @@ const SearchBar = ({ placeholder, onSearch, onClick }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`relative`}>
+    <form onSubmit={handleSubmit} className="relative w-full">
       <div
         className={`
         relative flex items-center w-full
@@ -59,7 +59,7 @@ const SearchBar = ({ placeholder, onSearch, onClick }) => {
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           className={`
-            w-full  py-3 text-sm text-gray-900 placeholder-gray-500
+            w-full h-10 text-sm text-gray-900 placeholder-gray-500
             bg-transparent border-none rounded-lg focus:outline-none
             ${isFocused ? "pl-3" : "pl-10"}
           `}

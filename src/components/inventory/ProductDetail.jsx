@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import { X, Upload, Plus, Trash2 } from "lucide-react";
+import { X, Upload, Trash2, ArrowBigLeftDashIcon, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import addProduct from "../../api/inventoryApi/AddProduct";
-import { useNavigate } from "react-router-dom";
-import getAllCategory from "../../api/inventoryApi/GetAllCategory";
+import { useNavigate, useParams } from "react-router-dom";
 import getAProducts from "../../api/inventoryApi/getAproduct";
 import Loading from "../utli/Loading";
-import { useParams } from "react-router-dom";
 import { MdOutlineEdit } from "react-icons/md";
 import deleteStock from "../../api/inventoryApi/DeleteStock";
 import deleteStockImage from "../../api/inventoryApi/deleteStockImage";
@@ -32,22 +29,18 @@ const ProductDetail = () => {
     discountPercentage: 0,
   });
 
-  const [errors, setErrors] = useState({});
-
   const [uploadedImages, setUploadedImages] = useState([]);
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
-  const [categoryOptions, setCategoryOptions] = useState([]);
-
   const [wholesalePrices, setWholesalePrices] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
-  const [isDeleteProductModalOpen, setIsDeleteProductModalOpen] =
-    useState(false);
+  const [isDeleteProductModalOpen, setIsDeleteProductModalOpen] = useState(false);
+
   const [newImages, setNewImages] = useState([]);
   const [isAddingImages, setIsAddingImages] = useState(false);
 
-  const deleteProduct = async (productId) => {
+  const deleteProduct = async () => {
     setIsDeleteProductModalOpen(true);
   };
 
@@ -73,14 +66,10 @@ const ProductDetail = () => {
     if (!imageToDelete) return;
 
     try {
-      const response = await deleteStockImage(
-        porductId,
-        imageToDelete.spaceKey,
-      );
+      const response = await deleteStockImage(porductId, imageToDelete.spaceKey);
       if (response.success) {
-        // Update the uploadedImages state to remove the deleted image
         setUploadedImages((prev) =>
-          prev.filter((img) => img._id !== imageToDelete._id),
+          prev.filter((img) => img._id !== imageToDelete._id)
         );
         toast.success("Image deleted successfully");
       }
@@ -90,102 +79,6 @@ const ProductDetail = () => {
     } finally {
       setImageToDelete(null);
     }
-  };
-
-  const validateField = (name, value) => {
-    const requiredFields = [
-      "productName",
-      "productCode",
-      "retailPrice",
-      "totalQuantity",
-      "weight",
-      "description",
-      "productCategory",
-    ];
-
-    if (
-      requiredFields.includes(name) &&
-      (!value || value.toString().trim() === "")
-    ) {
-      return `${name
-        .replace(/([A-Z])/g, " $1")
-        .replace(/^./, (str) => str.toUpperCase())} is required`;
-    }
-    return "";
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
-
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    const error = validateField(name, value);
-    if (error) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: error,
-      }));
-    }
-  };
-
-  // const getCategoryName = async () => {
-  //   // setLoading(true);
-  //   const response = await getAllCategory();
-  //   if (response.success) {
-  //     console.log(response.data);
-  //     setCategoryOptions(response.data.map((category) => category.category));
-  //     // setCategory(response.data);
-  //     // setLoading(false);
-  //   } else if (response.success === false) {
-  //   }
-  // };
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const maxImages = 3;
-
-    if (uploadedImages.length + files.length > maxImages) {
-      toast.error(`You can only upload up to ${maxImages} images`);
-      return;
-    }
-
-    files.forEach((file) => {
-      if (file.size > 10 * 1024 * 1024) {
-        // 10MB limit
-        toast.error("File size must be less than 10MB");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUploadedImages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + Math.random(),
-            file: file,
-            url: e.target.result,
-            name: file.name,
-          },
-        ]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeImage = (imageId) => {
-    setUploadedImages((prev) => prev.filter((img) => img.id !== imageId));
   };
 
   const handleNewImageUpload = (e) => {
@@ -257,98 +150,10 @@ const ProductDetail = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const newErrors = {};
-    const requiredFields = [
-      "productName",
-      "productCode",
-      "retailPrice",
-      "totalQuantity",
-      "weight",
-      "description",
-      "productCategory",
-    ];
-
-    requiredFields.forEach((field) => {
-      const error = validateField(field, formData[field]);
-      if (error) {
-        newErrors[field] = error;
-      }
-    });
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    // console.log("Form submitted:", formData);
-
-    const data = new FormData();
-    data.append("name", formData.productName);
-    data.append("productCode", formData.productCode);
-    data.append("retailUnitPrice", formData.retailPrice);
-    data.append("stockQuantity", formData.totalQuantity);
-    data.append("weight", formData.weight);
-    data.append("description", formData.description);
-    data.append("category", formData.productCategory);
-    data.append(
-      "onSale",
-      formData.storeInventory === "sellProduct" ? true : false,
-    );
-    if (uploadedImages.length > 0) {
-      uploadedImages.forEach((img) => {
-        data.append("images", img.file);
-      });
-    }
-    wholesalePrices.forEach((price, index) => {
-      data.append(`wholeSale[${index}][wholeSaleQuantity]`, price.qty);
-      data.append(`wholeSale[${index}][wholeSaleUnitPrice]`, price.price);
-    });
-    // console.log(data);
-    const res = await addProduct(data);
-    // console.log(res);
-    if (res.success) {
-      navigate("/");
-    }
-  };
-
-  const addWholesalePrice = () => {
-    const newId = Math.max(...wholesalePrices.map((w) => w.id)) + 1;
-    setWholesalePrices((prev) => [...prev, { id: newId, qty: "", price: "" }]);
-  };
-
-  const removeWholesalePrice = (id) => {
-    if (wholesalePrices.length > 1) {
-      setWholesalePrices((prev) => prev.filter((w) => w.id !== id));
-    }
-  };
-
-  const handleWholesaleChange = (id, field, value) => {
-    setWholesalePrices((prev) =>
-      prev.map((w) => (w.id === id ? { ...w, [field]: value } : w)),
-    );
-  };
-
-  const handleCategorySelect = (category) => {
-    setFormData((prev) => ({
-      ...prev,
-      productCategory: category,
-    }));
-    setIsCategoryDropdownOpen(false);
-  };
-
-  const filteredCategories = categoryOptions.filter((category) =>
-    category.toLowerCase().includes(formData.productCategory.toLowerCase()),
-  );
-
   const getProduct = async () => {
     setLoading(true);
     const response = await getAProducts(id);
-    console.log(response);
     if (response.success) {
-      // console.log(response.data);
       setFormData({
         productName: response.data.name,
         productCode: response.data.productCode,
@@ -385,9 +190,12 @@ const ProductDetail = () => {
     <div className="mx-auto h-[calc(100vh-4px)] overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200">
-        <h1 className="text-xl font-semibold text-gray-900">
-          {formData.productName} Details
-        </h1>
+        <div className="flex items-center gap-2">
+          <ArrowLeft className="w-6 h-6 cursor-pointer" onClick={() => navigate(-1)} />
+          <h1 className="text-xl font-semibold text-gray-900">
+            {formData.productName} Details
+          </h1>
+        </div>
         <button
           onClick={() => navigate(-1)}
           className="p-1 hover:bg-gray-100 rounded-full"
@@ -396,7 +204,7 @@ const ProductDetail = () => {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6">
+      <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Product Information */}
           <div className="lg:col-span-2 space-y-6 ">
@@ -415,19 +223,10 @@ const ProductDetail = () => {
                   type="text"
                   name="productName"
                   value={formData.productName}
-                  onChange={handleInputChange}
                   readOnly
-                  onBlur={handleBlur}
                   placeholder="Enter Product Name"
-                  required
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none  ${errors.productName ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none border-gray-300 bg-gray-50"
                 />
-                {errors.productName && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.productName}
-                  </p>
-                )}
 
                 {/* Tags Display */}
                 {formData.tags && formData.tags.length > 0 && (
@@ -455,19 +254,10 @@ const ProductDetail = () => {
                     type="text"
                     name="productCode"
                     value={formData.productCode}
-                    onChange={handleInputChange}
                     readOnly
-                    onBlur={handleBlur}
                     placeholder="Enter Product Code"
-                    required
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none  ${errors.productCode ? "border-red-500" : "border-gray-300"
-                      }`}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none border-gray-300 bg-gray-50"
                   />
-                  {errors.productCode && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.productCode}
-                    </p>
-                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -501,24 +291,13 @@ const ProductDetail = () => {
                       name="totalQuantity"
                       value={formData.totalQuantity}
                       readOnly
-                      onChange={handleInputChange}
-                      onBlur={handleBlur}
                       placeholder="Enter Quantity"
-                      required
-                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none  ${errors.totalQuantity
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        }`}
+                      className="w-full px-3 py-2 pr-12 border rounded-md focus:outline-none border-gray-300 bg-gray-50"
                     />
                     <span className="absolute right-3 top-2 text-sm text-gray-500">
                       PCS
                     </span>
                   </div>
-                  {errors.totalQuantity && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.totalQuantity}
-                    </p>
-                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -531,20 +310,13 @@ const ProductDetail = () => {
                       name="weight"
                       value={formData.unitWeight}
                       readOnly
-                      onChange={handleInputChange}
-                      onBlur={handleBlur}
                       placeholder="Enter Weight"
-                      required
-                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none  ${errors.weight ? "border-red-500" : "border-gray-300"
-                        }`}
+                      className="w-full px-3 py-2 pr-12 border rounded-md focus:outline-none border-gray-300 bg-gray-50"
                     />
                     <span className="absolute right-3 top-2 text-sm text-gray-500">
                       KG
                     </span>
                   </div>
-                  {errors.weight && (
-                    <p className="mt-1 text-sm text-red-600">{errors.weight}</p>
-                  )}
                 </div>
               </div>
 
@@ -556,20 +328,11 @@ const ProductDetail = () => {
                 <textarea
                   name="description"
                   value={formData.description}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
                   readOnly
                   placeholder="Describe what this kind of product is"
                   rows={4}
-                  required
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none  resize-none ${errors.description ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none resize-none border-gray-300 bg-gray-50"
                 />
-                {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.description}
-                  </p>
-                )}
               </div>
             </div>
 
@@ -593,29 +356,12 @@ const ProductDetail = () => {
                         value="inStock"
                         readOnly
                         checked={formData.productType === "regular"}
-                        onChange={handleInputChange}
-                        required
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
                       <span className="ml-2 text-sm text-gray-700">
                         In Stock
                       </span>
                     </label>
-                    {/* <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="productType"
-                        value="preOrder"
-                        readOnly
-                        checked={formData.productType === "preOrder"}
-                        onChange={handleInputChange}
-                        required
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        Pre Order
-                      </span>
-                    </label> */}
                   </div>
                 </div>
 
@@ -625,35 +371,39 @@ const ProductDetail = () => {
                     Store in Inventory
                   </label>
                   <div className="flex gap-6">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="storeInventory"
-                        readOnly
-                        value="sellProduct"
-                        checked={formData.storeInventory}
-                        onChange={handleInputChange}
-                        required
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        Sell Product
-                      </span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="storeInventory"
-                        value="storeIn"
-                        checked={!formData.storeInventory}
-                        onChange={handleInputChange}
-                        required
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        Store In
-                      </span>
-                    </label>
+                    {
+                      formData.storeInventory ? (
+                        <label className="flex items-center">
+
+                          <input
+                            type="radio"
+                            name="storeInventory"
+                            readOnly
+                            value="sellProduct"
+                            checked={formData.storeInventory}
+                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">
+                            Sell Product
+                          </span>
+                        </label>
+                      ) :
+                        (
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="storeInventory"
+                              value="storeIn"
+                              checked={!formData.storeInventory}
+                              disabled
+                              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">
+                              Store In
+                            </span>
+                          </label>
+                        )
+                    }
                   </div>
                 </div>
               </div>
@@ -667,124 +417,72 @@ const ProductDetail = () => {
                   <input
                     type="text"
                     name="productCategory"
+                    disabled
                     value={formData.productCategory}
-                    onChange={handleInputChange}
                     onFocus={() => setIsCategoryDropdownOpen(true)}
                     placeholder="Enter Product Category"
-                    // required
-                    className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none  ${errors.productCategory
-                      ? "border-red-500"
-                      : "border-gray-300"
-                      }`}
+                    className="w-full px-3 py-2 pr-10 border rounded-md focus:outline-none bg-gray-50"
                   />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setIsCategoryDropdownOpen(!isCategoryDropdownOpen)
-                    }
-                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                  >
-                    <svg
-                      className="w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {isCategoryDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                      {filteredCategories.length > 0
-                        ? filteredCategories.map((category, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleCategorySelect(category)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                          >
-                            {category}
-                          </button>
-                        ))
-                        : null}
-                    </div>
-                  )}
                 </div>
-                {errors.productCategory && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.productCategory}
-                  </p>
-                )}
+
               </div>
             </div>
 
             {/* Wholesale Pricing Section */}
-            <div className="border border-gray-200 shadow-md p-4 rounded">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Wholesale Pricing
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                {wholesalePrices.map((wholesale, index) => (
-                  <div
-                    key={wholesale._id}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg relative"
-                  >
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Wholesale Qty - {index + 1}
-                      </label>
-                      <input
-                        type="number"
-                        value={wholesale.wholeSaleQuantity}
-                        readOnly
-                        onChange={(e) =>
-                          handleWholesaleChange(
-                            wholesale.id,
-                            "qty",
-                            e.target.value,
-                          )
-                        }
-                        placeholder="Eg - 10"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none "
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Wholesale Price - {index + 1}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={wholesale.wholeSaleUnitPrice}
-                          readOnly
-                          onChange={(e) =>
-                            handleWholesaleChange(
-                              wholesale.id,
-                              "price",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="Eg - 55000"
-                          className="w-full px-3 py-2 pr-12 border border-gray-300 rounded-md focus:outline-none"
-                        />
-                        <span className="absolute right-3 top-3 text-sm text-gray-500">
-                          MMK
-                        </span>
-                      </div>
-                    </div>
+            {
+              wholesalePrices.length > 0 ? (
+                <div className="border border-gray-200 shadow-md p-4 rounded">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-medium text-gray-900">
+                      Wholesale Pricing
+                    </h2>
                   </div>
-                ))}
-              </div>
-            </div>
+
+                  <div className="space-y-4">
+                    {wholesalePrices.map((wholesale, index) => (
+                      <div
+                        key={wholesale._id}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg relative"
+                      >
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Wholesale Qty - {index + 1}
+                          </label>
+                          <input
+                            type="number"
+                            value={wholesale.wholeSaleQuantity}
+                            readOnly
+                            placeholder="Eg - 10"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Wholesale Price - {index + 1}
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              value={wholesale.wholeSaleUnitPrice}
+                              readOnly
+                              placeholder="Eg - 55000"
+                              className="w-full px-3 py-2 pr-12 border border-gray-300 rounded-md focus:outline-none bg-gray-50"
+                            />
+                            <span className="absolute right-3 top-3 text-sm text-gray-500">
+                              MMK
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-center text-gray-500">
+                  No wholesale prices available
+                </p>
+              )
+            }
           </div>
 
           {/* Right Column - Product Images */}
@@ -919,7 +617,7 @@ const ProductDetail = () => {
             <span className="text-[14px]">Edit Product</span>
           </button>
         </div>
-      </form>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

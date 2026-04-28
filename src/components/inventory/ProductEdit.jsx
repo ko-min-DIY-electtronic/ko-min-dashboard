@@ -182,7 +182,7 @@ const ProductDetail = () => {
 
     const res = await updateProduct({ productId, data });
     if (res.success) {
-      navigate("/");
+      navigate(-1)
     }
   };
 

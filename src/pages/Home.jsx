@@ -21,9 +21,9 @@ import ChatDetailPage from "./ChatDetail";
 function Home() {
   return (
     <>
-      <div className="flex bg-gray-50">
+      <div className="flex bg-gray-50 min-h-screen">
         <Navbar />
-        <div className="flex-1 ml-0 lg:ml-16 p-4">
+        <div className="flex-1 ml-0 lg:ml-16 pt-20 lg:pt-4 px-4 pb-4">
           <Routes>
             <Route path="/" element={<Inventory />} />
             <Route path="/add-product" element={<AddProduct />} />

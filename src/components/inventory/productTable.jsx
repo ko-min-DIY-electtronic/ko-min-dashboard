@@ -1,14 +1,32 @@
 import { EyeIcon } from "lucide-react";
 import { useState } from "react";
 import { MdArrowBackIosNew, MdArrowForwardIos } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const ProductTable = ({ products, sentQuantityModal, loading }) => {
   // console.log("products", products);
   // const role = JSON.parse(localStorage.getItem("uedc-user"))?.role;
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentPage = parseInt(searchParams.get("page")) || 1;
+  const itemsPerPage = parseInt(searchParams.get("limit")) || 10;
+
+  const setCurrentPage = (page) => {
+    setSearchParams((prev) => {
+      prev.set("page", page);
+      return prev;
+    });
+  };
+
+  const setItemsPerPage = (limit) => {
+    setSearchParams((prev) => {
+      prev.set("limit", limit);
+      prev.set("page", 1);
+      return prev;
+    });
+  };
+
   const [selectedCategory, setSelectedCategory] = useState("In Stock");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 

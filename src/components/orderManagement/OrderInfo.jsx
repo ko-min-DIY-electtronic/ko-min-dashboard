@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import getAOrder from "../../api/orderApi/getAOrder";
 import { ImCancelCircle } from "react-icons/im";
 import Loading from "../utli/Loading";
+import { useNavigate } from "react-router-dom";
 
 function OrderInfo({ selectedOrder, refreshOrders, handleClose }) {
-  // const role = JSON.parse(localStorage.getItem("uedc-user"))?.role;
+  const navigate = useNavigate();
+  const role = JSON.parse(localStorage.getItem("uedc-user"))?.role;
   // console.log(role);
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState(null);

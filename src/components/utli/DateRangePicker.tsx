@@ -92,12 +92,21 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     });
   };
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
-    <div className="relative" ref={pickerRef}>
+    <div className="relative w-full" ref={pickerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-slate-50 transition-colors focus:ring-2 focus:ring-primary outline-none"
+        className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-slate-50 transition-colors focus:ring-2 focus:ring-primary outline-none w-full h-10 bg-white"
       >
         <Calendar className="w-4 h-4 text-slate-600" />
         <span className="text-sm text-slate-700">
@@ -107,7 +116,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         </span>
         {(startDate || endDate) && (
           <X
-            className="w-4 h-4 text-slate-400 hover:text-slate-600"
+            className="w-4 h-4 text-slate-400 hover:text-slate-600 ml-auto"
             onClick={(e) => {
               e.stopPropagation();
               handleClear();
@@ -117,32 +126,40 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg border z-50 p-4">
-          <DateRange
-            ranges={[dateRange]}
-            onChange={handleSelect}
-            moveRangeOnFirstSelection={false}
-            months={2}
-            direction="horizontal"
-            rangeColors={["#3b82f6"]}
+        <>
+          {/* Mobile Overlay */}
+          <div 
+            className="fixed inset-0 bg-black/20 z-40 sm:hidden" 
+            onClick={() => setIsOpen(false)} 
           />
-          <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-            <button
-              type="button"
-              onClick={handleClear}
-              className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={handleApply}
-              className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Apply
-            </button>
+          
+          <div className="fixed sm:absolute top-1/2 sm:top-full left-1/2 sm:left-auto right-auto sm:right-0 -translate-x-1/2 sm:translate-x-0 -translate-y-1/2 sm:translate-y-0 mt-0 sm:mt-2 bg-white rounded-xl shadow-lg border z-50 p-2 sm:p-4 w-[95vw] sm:w-auto max-h-[90vh] sm:max-h-none overflow-y-auto sm:overflow-visible">
+            <DateRange
+              ranges={[dateRange]}
+              onChange={handleSelect}
+              moveRangeOnFirstSelection={false}
+              months={isMobile ? 1 : 2}
+              direction={isMobile ? "vertical" : "horizontal"}
+              rangeColors={["#3b82f6"]}
+            />
+            <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+              <button
+                type="button"
+                onClick={handleClear}
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={handleApply}
+                className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Apply
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
