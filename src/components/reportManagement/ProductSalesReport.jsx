@@ -28,14 +28,14 @@ export default function ProductSalesReport({ productReport, formatCurrency, star
         {endDate?.toLocaleDateString()})
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <StatCard
           title="Total Quantity Sold"
           value={productReport?.data?.summary?.totalQuantitySold || 0}
           icon={MdInventory}
           color="bg-blue-100"
         />
-        <StatCard
+        {/* <StatCard
           title="Total Revenue"
           value={`${formatCurrency(productReport?.data?.summary?.totalRevenue || 0)} MMK`}
           icon={MdAttachMoney}
@@ -46,7 +46,7 @@ export default function ProductSalesReport({ productReport, formatCurrency, star
           value={productReport?.data?.summary?.totalOrders || 0}
           icon={MdShoppingCart}
           color="bg-purple-100"
-        />
+        /> */}
         <StatCard
           title="Unique Products"
           value={productReport?.data?.summary?.totalUniqueProducts || 0}
