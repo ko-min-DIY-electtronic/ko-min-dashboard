@@ -19,7 +19,12 @@ const StatCard = ({ title, value, icon: Icon, color = "bg-gray-100" }) => (
   </div>
 );
 
-export default function ProductSalesReport({ productReport, formatCurrency, startDate, endDate }) {
+export default function ProductSalesReport({
+  productReport,
+  formatCurrency,
+  startDate,
+  endDate,
+}) {
   return (
     <div className="pb-10">
       {/* Product Sale Overview */}
@@ -58,17 +63,29 @@ export default function ProductSalesReport({ productReport, formatCurrency, star
       {/* Product Wise Table */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
         <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Product Performance</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Product Performance
+          </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase">Product</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase text-center">Price</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase text-center">Qty Sold</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase text-center">Orders</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase text-right">Revenue</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
+                  Product
+                </th>
+                {/* <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase text-center">
+                  Price
+                </th> */}
+                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase text-center">
+                  Qty Sold
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase text-center">
+                  Orders
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase text-right">
+                  Revenue
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -76,13 +93,17 @@ export default function ProductSalesReport({ productReport, formatCurrency, star
                 <tr key={idx} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-medium text-gray-900">{product.productName}</span>
-                      <span className="text-xs text-gray-500">{product.productCode} • {product.category}</span>
+                      <span className="font-medium text-gray-900">
+                        {product.productName}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {product.productCode} • {product.category}
+                      </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-700">
+                  {/* <td className="px-6 py-4 text-center text-sm text-gray-700">
                     {formatCurrency(product.unitPrice)} MMK
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4 text-center font-semibold text-gray-900">
                     {product.totalQuantitySold}
                   </td>
@@ -94,9 +115,13 @@ export default function ProductSalesReport({ productReport, formatCurrency, star
                   </td>
                 </tr>
               ))}
-              {(!productReport?.data?.products || productReport.data.products.length === 0) && (
+              {(!productReport?.data?.products ||
+                productReport.data.products.length === 0) && (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                  <td
+                    colSpan="5"
+                    className="px-6 py-10 text-center text-gray-500"
+                  >
                     No product sales found for this period
                   </td>
                 </tr>
