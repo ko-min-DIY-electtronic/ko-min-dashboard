@@ -1,9 +1,22 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, User, Bot, ImagePlus, Mic, Square, Trash2 } from "lucide-react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import {
+  ArrowLeft,
+  Send,
+  User,
+  Bot,
+  ImagePlus,
+  Mic,
+  Square,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
-import { getConversationMessages, sendMessage } from "../../api/chatApi/chatMessages";
+import {
+  getConversationMessages,
+  sendMessage,
+} from "../../api/chatApi/chatMessages";
 import { markConversationAsRead } from "../../api/chatApi/getConversations";
+import startNewConversation from "../../api/chatApi/startNewConversation";
 import { io } from "socket.io-client";
 import Loading from "../utli/Loading";
 
@@ -12,10 +25,10 @@ const socket = io.connect(import.meta.env.VITE_APP_WEBSOCKET_API, {
   secure: true,
 });
 
-
 const ChatDetail = () => {
-  const { id } = useParams();
+  const { id, userId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const messagesEndRef = useRef(null);
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -26,34 +39,44 @@ const ChatDetail = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isNewConversation, setIsNewConversation] = useState(false);
   const timerRef = useRef(null);
+
+  // Determine if this is a new conversation or existing one
+  const conversationId = id || conversation?._id;
+  const isUserChat = !!userId;
 
   // ── Fetch messages + Socket: join room & listen ──────────────────────
   useEffect(() => {
-    if (!id) return;
+    if (isUserChat) {
+      // New conversation - don't fetch messages, just set up for new chat
+      setLoading(false);
+      setIsNewConversation(true);
+      return;
+    }
 
+    if (!conversationId) return;
 
-    // 1. Fetch existing messages via API
+    // Existing conversation - fetch messages and join socket room
     fetchMessages();
 
-    // 2. Clean any previous listener
+    // Clean any previous listener
     socket.off("chat:message");
 
-
-    // 4. Join the conversation room (wait for connection if needed)
+    // Join the conversation room
     const emitJoin = () => {
-      socket.emit("chat:join", id);
-      console.log("Joined conversation room:", id);
+      socket.emit("chat:join", conversationId);
+      console.log("Joined conversation room:", conversationId);
     };
 
     emitJoin();
 
-
-    // 3. Register the message listener
+    // Register the message listener
     socket.on("chat:message", (data) => {
-      // If data.message is an object, it's the new wrapped format; 
-      // otherwise, data itself is likely the message object.
-      const message = (data && data.message && typeof data.message === 'object') ? data.message : data;
+      const message =
+        data && data.message && typeof data.message === "object"
+          ? data.message
+          : data;
 
       setMessages((prev) => {
         if (prev.some((m) => m._id === message._id)) {
@@ -63,11 +86,11 @@ const ChatDetail = () => {
       });
     });
 
-    // 5. Cleanup on unmount or when id changes
+    // Cleanup on unmount or when id changes
     return () => {
       socket.off("chat:message");
     };
-  }, []);
+  }, [isUserChat, conversationId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -100,7 +123,33 @@ const ChatDetail = () => {
       setSending(true);
       const text = newMessage.trim();
       setNewMessage(""); // Clear early for better UX
-      const response = await sendMessage(id, text);
+
+      // If this is a new conversation, create it and send the first message
+      if (isUserChat && !conversation) {
+        const newConv = await startNewConversation(userId, text);
+        if (!newConv) {
+          toast.error("Failed to start conversation");
+          setNewMessage(text); // Restore on failure
+          return;
+        }
+        setConversation(newConv);
+
+        // Navigate to the new conversation URL
+        navigate(`/chat/${newConv._id}`, { replace: true });
+
+        // Add the sent message to the messages list
+        const sentMessage = {
+          _id: Date.now().toString(), // Temporary ID
+          message: text,
+          senderModel: "Admin",
+          createdAt: new Date().toISOString(),
+        };
+        setMessages([sentMessage]);
+        return; // Exit early since message was already sent
+      }
+
+      // For existing conversations, send message normally
+      const response = await sendMessage(conversationId, text);
 
       if (!response.success) {
         toast.error("Failed to send message");
@@ -109,6 +158,7 @@ const ChatDetail = () => {
     } catch (error) {
       toast.error("Error sending message");
       console.error("Error sending message:", error);
+      setNewMessage(newMessage.trim()); // Restore on failure
     } finally {
       setSending(false);
     }
@@ -156,8 +206,12 @@ const ChatDetail = () => {
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunks, { type: "audio/m4a" });
-        const audioFile = new File([audioBlob], `voice-message-${Date.now()}.m4a`, { type: "audio/m4a" });
-        
+        const audioFile = new File(
+          [audioBlob],
+          `voice-message-${Date.now()}.m4a`,
+          { type: "audio/m4a" },
+        );
+
         try {
           setSending(true);
           const response = await sendMessage(id, audioFile);
@@ -170,18 +224,17 @@ const ChatDetail = () => {
           setSending(false);
         }
 
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       setRecorder(mediaRecorder);
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingDuration(0);
-      
-      timerRef.current = setInterval(() => {
-        setRecordingDuration(prev => prev + 1);
-      }, 1000);
 
+      timerRef.current = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
     } catch (error) {
       console.error("Error accessing microphone:", error);
       toast.error("Could not access microphone");
@@ -204,14 +257,14 @@ const ChatDetail = () => {
         clearInterval(timerRef.current);
       };
       recorder.stop();
-      recorder.stream.getTracks().forEach(track => track.stop());
+      recorder.stream.getTracks().forEach((track) => track.stop());
     }
   };
 
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const scrollToBottom = () => {
@@ -241,7 +294,8 @@ const ChatDetail = () => {
     return <Loading />;
   }
 
-  if (!conversation) {
+  // For new conversations, we don't need the conversation check
+  if (!conversation && !isUserChat) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
@@ -277,10 +331,14 @@ const ChatDetail = () => {
             </div>
             <div>
               <h1 className="text-lg font-semibold text-gray-900">
-                {conversation.userId.userName}
+                {isUserChat
+                  ? "New Conversation"
+                  : conversation?.userId?.userName || "Customer"}
               </h1>
               <p className="text-sm text-gray-500">
-                {conversation.userId.phoneNumber}
+                {isUserChat
+                  ? "Start chatting with customer"
+                  : conversation?.userId?.phoneNumber || ""}
               </p>
             </div>
           </div>
@@ -293,7 +351,9 @@ const ChatDetail = () => {
           {messages.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500">
-                No messages yet. Start the conversation!
+                {isUserChat
+                  ? "Start a new conversation with this customer"
+                  : "No messages yet. Start the conversation!"}
               </p>
             </div>
           ) : (
@@ -302,7 +362,7 @@ const ChatDetail = () => {
               const showDate =
                 index === 0 ||
                 formatDate(messages[index - 1].createdAt) !==
-                formatDate(message.createdAt);
+                  formatDate(message.createdAt);
 
               return (
                 <div key={message._id}>
@@ -315,16 +375,19 @@ const ChatDetail = () => {
                   )}
 
                   <div
-                    className={`flex ${isAdmin ? "justify-end" : "justify-start"
-                      }`}
+                    className={`flex ${
+                      isAdmin ? "justify-end" : "justify-start"
+                    }`}
                   >
                     <div
-                      className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${isAdmin ? "flex-row-reverse space-x-reverse" : ""
-                        }`}
+                      className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${
+                        isAdmin ? "flex-row-reverse space-x-reverse" : ""
+                      }`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isAdmin ? "bg-blue-500" : "bg-gray-300"
-                          }`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          isAdmin ? "bg-blue-500" : "bg-gray-300"
+                        }`}
                       >
                         {isAdmin ? (
                           <Bot className="h-4 w-4 text-white" />
@@ -334,10 +397,12 @@ const ChatDetail = () => {
                       </div>
 
                       <div
-                        className={`rounded-lg overflow-hidden ${message.messageType === "image" || message.messageType === "voice"
+                        className={`rounded-lg overflow-hidden ${
+                          message.messageType === "image" ||
+                          message.messageType === "voice"
                             ? "p-0 bg-transparent"
                             : `px-4 py-2 ${isAdmin ? "bg-blue-500 text-white" : "bg-white text-gray-900 border border-gray-200"}`
-                          }`}
+                        }`}
                       >
                         {message.messageType === "image" ? (
                           <div className="space-y-1">
@@ -345,7 +410,9 @@ const ChatDetail = () => {
                               src={message.message}
                               alt="Shared"
                               className="max-w-full rounded-md cursor-pointer hover:opacity-95 transition-opacity max-h-72 object-cover"
-                              onClick={() => window.open(message.message, "_blank")}
+                              onClick={() =>
+                                window.open(message.message, "_blank")
+                              }
                             />
                           </div>
                         ) : message.messageType === "voice" ? (
@@ -357,18 +424,27 @@ const ChatDetail = () => {
                             >
                               <source src={message.message} type="audio/mpeg" />
                               <source src={message.message} type="audio/mp4" />
-                              <source src={message.message} type="audio/x-m4a" />
+                              <source
+                                src={message.message}
+                                type="audio/x-m4a"
+                              />
                               Your browser does not support audio.
                             </audio>
                           </div>
                         ) : (
-                          <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+                          <p className="text-sm whitespace-pre-wrap">
+                            {message.message}
+                          </p>
                         )}
                         <p
-                          className={`text-xs mt-1 ${message.messageType === "image" || message.messageType === "voice"
+                          className={`text-xs mt-1 ${
+                            message.messageType === "image" ||
+                            message.messageType === "voice"
                               ? "text-gray-500 px-2 pb-1"
-                              : isAdmin ? "text-blue-100" : "text-gray-500"
-                            }`}
+                              : isAdmin
+                                ? "text-blue-100"
+                                : "text-gray-500"
+                          }`}
                         >
                           {formatTime(message.createdAt)}
                         </p>
@@ -389,7 +465,9 @@ const ChatDetail = () => {
             <div className="flex items-center justify-between bg-blue-50 rounded-lg px-4 py-3">
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-sm font-medium text-blue-700">Recording... {formatDuration(recordingDuration)}</span>
+                <span className="text-sm font-medium text-blue-700">
+                  Recording... {formatDuration(recordingDuration)}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <button
@@ -409,7 +487,10 @@ const ChatDetail = () => {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSendMessage} className="flex items-center space-x-4">
+            <form
+              onSubmit={handleSendMessage}
+              className="flex items-center space-x-4"
+            >
               <div className="flex-1 flex items-center space-x-2">
                 <input
                   type="file"
@@ -421,8 +502,9 @@ const ChatDetail = () => {
                 />
                 <label
                   htmlFor="image-upload"
-                  className={`p-3 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors ${sending ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                  className={`p-3 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors ${
+                    sending ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   title="Send Image"
                 >
                   <ImagePlus className="h-5 w-5" />
@@ -461,8 +543,7 @@ const ChatDetail = () => {
         </div>
       </div>
     </div>
-  )
+  );
 };
-
 
 export default ChatDetail;

@@ -42,6 +42,7 @@ function Home() {
             <Route path="/banners/create" element={<CreateBanner />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/:id" element={<ChatDetailPage />} />
+            <Route path="/chat/user/:userId" element={<ChatDetailPage />} />
           </Routes>
         </div>
       </div>

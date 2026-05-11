@@ -5,7 +5,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import getReceiptImage from "../../api/receipt/getReceiptIamge";
 import UpdateModel from "./UpdateModel";
 import chgOrderStatus from "../../api/orderApi/chgOrderStatus";
-import { MdArrowBack, MdOutlinePhone, MdLocalShipping, MdCheckCircle, MdCheck, MdCancel } from "react-icons/md";
+import getConversationsByUserId from "../../api/chatApi/getConversationsByUserId";
+import { toast } from "sonner";
+import {
+  MdArrowBack,
+  MdOutlinePhone,
+  MdLocalShipping,
+  MdCheckCircle,
+  MdCheck,
+  MdCancel,
+  MdChat,
+} from "react-icons/md";
 import Loading from "../utli/Loading";
 import avatar from "../../assets/Oval.png";
 
@@ -76,6 +86,28 @@ export default function OrderDetails() {
 
   const handleClose = () => {
     setIsOpen(false);
+  };
+
+  const handleChat = async () => {
+    if (!order?.userId?._id) {
+      toast.error("User ID not found");
+      return;
+    }
+
+    try {
+      const conversation = await getConversationsByUserId(order.userId._id);
+      if (conversation && conversation._id) {
+        // Navigate to existing conversation
+        navigate(`/chat/${conversation._id}`);
+      } else {
+        // Navigate to chat page with user ID for new conversation
+        navigate(`/chat/user/${order.userId._id}`);
+      }
+    } catch (error) {
+      console.error("Error navigating to chat:", error);
+      // If API fails, still try to navigate with user ID
+      navigate(`/chat/user/${order.userId._id}`);
+    }
   };
 
   useEffect(() => {
@@ -150,6 +182,15 @@ export default function OrderDetails() {
                 Mark as Success
               </button>
             )}
+
+            {/* Chat Button */}
+            <button
+              className="flex items-center gap-2 border border-green-500 px-4 py-3 rounded-3xl text-green-500 hover:bg-green-500 hover:text-white transition-all duration-300 text-[15px] font-medium"
+              onClick={handleChat}
+            >
+              <MdChat size={20} />
+              Chat with Customer
+            </button>
           </div>
           {/* </div> */}
         </div>
@@ -357,35 +398,44 @@ export default function OrderDetails() {
                 <div key={item.stockId}>
                   {/* Mobile Card Layout */}
                   <div className="sm:hidden bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 text-sm mb-1">
-                            {item.name}
-                          </h3>
-                          <p className="text-xs text-gray-600">
-                            Category: {item.category}
-                          </p>
-                        </div>
-                        <div className="text-right">
+                    <div className="flex gap-4">
+                      {/* Product Image */}
+                      {item.images && item.images.length > 0 && (
+                        <img
+                          src={item.images[0].url}
+                          alt={item.name}
+                          className="w-20 h-20 object-cover rounded-md border border-gray-200 shrink-0"
+                        />
+                      )}
+
+                      {/* Product Details & Price */}
+                      <div className="flex-1 flex flex-col justify-center">
+                        <h3 className="font-semibold text-gray-900 text-[15px] leading-tight mb-1">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Category: {item.category}
+                        </p>
+
+                        <div className="mt-auto">
                           {item.isDiscounted ? (
-                            <>
-                              <div className="flex flex-col items-end">
-                                <span className="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded mb-1">
-                                  -{item.discountPercentage}%
-                                </span>
-                                <p className="text-xs text-gray-400 line-through">
-                                  {item.unitPrice.toLocaleString()} MMK
-                                </p>
-                                <p className="font-semibold text-primary text-sm">
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-semibold text-primary text-sm">
                                   {(
                                     item.unitPrice *
                                     (1 - item.discountPercentage / 100)
                                   ).toLocaleString()}{" "}
                                   MMK
-                                </p>
+                                </span>
+                                <span className="text-[11px] text-gray-400 line-through">
+                                  {item.unitPrice.toLocaleString()} MMK
+                                </span>
+                                <span className="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                  -{item.discountPercentage}%
+                                </span>
                               </div>
-                              <p className="text-xs text-gray-500 mt-1">
+                              <span className="text-[11px] text-gray-600 font-medium">
                                 Qty: {item.quantity} ={" "}
                                 {(
                                   item.unitPrice *
@@ -393,38 +443,47 @@ export default function OrderDetails() {
                                   item.quantity
                                 ).toLocaleString()}{" "}
                                 MMK
-                              </p>
-                            </>
+                              </span>
+                            </div>
                           ) : (
-                            <>
-                              <p className="font-semibold text-gray-900 text-sm">
+                            <div className="flex flex-col gap-1">
+                              <span className="font-semibold text-gray-900 text-sm">
                                 {item.unitPrice.toLocaleString()} MMK
-                              </p>
-                              <p className="text-xs text-gray-500">
+                              </span>
+                              <span className="text-[11px] text-gray-600 font-medium">
                                 Qty: {item.quantity} ={" "}
                                 {(
                                   item.unitPrice * item.quantity
                                 ).toLocaleString()}{" "}
                                 MMK
-                              </p>
-                            </>
+                              </span>
+                            </div>
                           )}
                         </div>
                       </div>
-                      <div className="flex justify-between text-xs text-gray-600">
-                        <span>Qty: {item.quantity}</span>
-                        <span>
-                          Weight: {item.unitWeight} {item.weightUnit}
-                        </span>
-                        <span>Sale Type: {item.sale}</span>
-                      </div>
+                    </div>
+
+                    {/* Footer Info */}
+                    <div className="flex justify-between items-center text-xs text-gray-500 pt-3 mt-3 border-t border-gray-200">
+                      <span>Qty: {item.quantity}</span>
+                      <span>
+                        Weight: {item.unitWeight} {item.weightUnit}
+                      </span>
+                      <span className="capitalize">Sale: {item.sale}</span>
                     </div>
                   </div>
 
                   {/* Desktop Table Row */}
                   <div className="hidden sm:grid grid-cols-5 gap-2 sm:gap-4 mb-6 items-center">
-                    <div className="text-gray-900 text-sm font-medium">
-                      {item.name}
+                    <div className="text-gray-900 text-sm font-medium flex items-center gap-3">
+                      {item.images && item.images.length > 0 && (
+                        <img
+                          src={item.images[0].url}
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded-md border border-gray-200 shrink-0"
+                        />
+                      )}
+                      <span>{item.name}</span>
                     </div>
                     <div className="text-gray-900 text-sm text-center">
                       {item.category}
@@ -509,9 +568,7 @@ export default function OrderDetails() {
                   {order?.discount > 0 && (
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="flex justify-between items-center text-red-600">
-                        <span className="text-sm font-medium">
-                          Discount
-                        </span>
+                        <span className="text-sm font-medium">Discount</span>
                         <span className="text-sm font-semibold">
                           -{order?.discount.toLocaleString()} MMK
                         </span>
@@ -600,7 +657,8 @@ export default function OrderDetails() {
                           Additional Weight Charge
                         </div>
                         <div className="text-gray-900 text-sm text-right">
-                          {order?.delivery.additionalWeightCharge.toLocaleString()} MMK
+                          {order?.delivery.additionalWeightCharge.toLocaleString()}{" "}
+                          MMK
                         </div>
                       </div>
 
@@ -618,10 +676,13 @@ export default function OrderDetails() {
                   {/* Delivery Fee */}
                   <div className="grid grid-cols-5 gap-2 sm:gap-4">
                     <div className="text-gray-900 text-sm font-medium col-span-4">
-                      {order?.delivery?.totalWeight > 2 ? "Total Delivery Fee" : "Delivery Fee"}
+                      {order?.delivery?.totalWeight > 2
+                        ? "Total Delivery Fee"
+                        : "Delivery Fee"}
                     </div>
                     <div className="text-gray-900 text-sm text-right">
-                      {order?.delivery.calculatedDeliveryFee.toLocaleString()} MMK
+                      {order?.delivery.calculatedDeliveryFee.toLocaleString()}{" "}
+                      MMK
                     </div>
                   </div>
                 </div>
