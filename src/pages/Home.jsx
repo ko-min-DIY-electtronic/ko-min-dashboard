@@ -18,6 +18,7 @@ import BannerDetail from "../components/banner/BannerDetail";
 import CreateBanner from "../components/banner/CreateBanner";
 import Chat from "./Chat";
 import ChatDetailPage from "./ChatDetail";
+import Settings from "./Settings";
 function Home() {
   return (
     <>
@@ -43,6 +44,7 @@ function Home() {
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/:id" element={<ChatDetailPage />} />
             <Route path="/chat/user/:userId" element={<ChatDetailPage />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>
       </div>

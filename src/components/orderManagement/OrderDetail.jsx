@@ -182,15 +182,6 @@ export default function OrderDetails() {
                 Mark as Success
               </button>
             )}
-
-            {/* Chat Button */}
-            <button
-              className="flex items-center gap-2 border border-green-500 px-4 py-3 rounded-3xl text-green-500 hover:bg-green-500 hover:text-white transition-all duration-300 text-[15px] font-medium"
-              onClick={handleChat}
-            >
-              <MdChat size={20} />
-              Chat with Customer
-            </button>
           </div>
           {/* </div> */}
         </div>
@@ -718,6 +709,15 @@ export default function OrderDetails() {
           onSubmit={getOrder}
         />
       )}
+
+      {/* Floating Chat Button */}
+      <button
+        className="fixed bottom-6 right-6 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50"
+        onClick={handleChat}
+      >
+        <MdChat size={20} />
+        <span className="text-[15px] font-medium">Chat with Customer</span>
+      </button>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
   Shield,
   Image,
   MessageCircle,
+  Settings,
 } from "lucide-react";
 import logo from "../assets/uedc.png";
 import { useContext } from "react";
@@ -97,6 +98,13 @@ function Navbar() {
       role: "customer-support",
       secondaryRole: "admin",
     },
+    {
+      path: "/settings",
+      icon: Settings,
+      label: "Settings",
+      role: "admin",
+      secondaryRole: "admin",
+    },
   ];
 
   // Show all nav items to all users
@@ -113,13 +121,12 @@ function Navbar() {
 
   useEffect(() => {
     socket.connect();
-    socket.emit('admin:join', 'admin');
+    socket.emit("admin:join", "admin");
 
     console.log("socket connected", socket.connected);
 
     socket.on("admin:new_message", (data) => {
       console.log("New chat message received:", data);
-
 
       if (!location.pathname.includes("/chat")) {
         setMessageCount((prev) => prev + 1);
@@ -193,30 +200,33 @@ function Navbar() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`
                         flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                        ${isActive(item.path)
-                        ? "bg-primary text-white shadow-lg"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }
+                        ${
+                          isActive(item.path)
+                            ? "bg-primary text-white shadow-lg"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        }
                     `}
                   >
                     <Icon size={20} />
                     <span className="font-medium">{item.label}</span>
                     {item.path === "/orders" && newOrderCount > 0 && (
                       <span
-                        className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive(item.path)
-                          ? "bg-white text-primary"
-                          : "bg-primary text-white"
-                          }`}
+                        className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          isActive(item.path)
+                            ? "bg-white text-primary"
+                            : "bg-primary text-white"
+                        }`}
                       >
                         {newOrderCount > 9 ? "9+" : newOrderCount}
                       </span>
                     )}
                     {item.path === "/chat" && messageCount > 0 && (
                       <span
-                        className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive(item.path)
-                          ? "bg-white text-primary"
-                          : "bg-primary text-white"
-                          }`}
+                        className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          isActive(item.path)
+                            ? "bg-white text-primary"
+                            : "bg-primary text-white"
+                        }`}
                       >
                         {messageCount > 9 ? "9+" : messageCount}
                       </span>
@@ -293,9 +303,10 @@ function Navbar() {
                       to={item.path}
                       className={`
                         flex items-center px-3 py-3 rounded-lg transition-all duration-300 relative group
-                        ${isActive(item.path, item.secondaryPath)
-                          ? "bg-primary text-white shadow-lg "
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        ${
+                          isActive(item.path, item.secondaryPath)
+                            ? "bg-primary text-white shadow-lg "
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                         }
  
                       `}
@@ -318,11 +329,13 @@ function Navbar() {
                     {/* Order Count Badge */}
                     {item.path === "/orders" && newOrderCount > 0 && (
                       <span
-                        className={`absolute ${isDesktopExpanded ? "right-4" : "-top-1 -right-1"
-                          } flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold shadow-sm transition-all duration-300 ${isActive(item.path, item.secondaryPath)
+                        className={`absolute ${
+                          isDesktopExpanded ? "right-4" : "-top-1 -right-1"
+                        } flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold shadow-sm transition-all duration-300 ${
+                          isActive(item.path, item.secondaryPath)
                             ? "bg-white text-primary"
                             : "bg-primary text-white"
-                          }`}
+                        }`}
                       >
                         {newOrderCount > 9 ? "9+" : newOrderCount}
                       </span>
@@ -331,11 +344,13 @@ function Navbar() {
                     {/* Chat Message Count Badge */}
                     {item.path === "/chat" && messageCount > 0 && (
                       <span
-                        className={`absolute ${isDesktopExpanded ? "right-4" : "-top-1 -right-1"
-                          } flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold shadow-sm transition-all duration-300 ${isActive(item.path, item.secondaryPath)
+                        className={`absolute ${
+                          isDesktopExpanded ? "right-4" : "-top-1 -right-1"
+                        } flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold shadow-sm transition-all duration-300 ${
+                          isActive(item.path, item.secondaryPath)
                             ? "bg-white text-primary"
                             : "bg-primary text-white"
-                          }`}
+                        }`}
                       >
                         {messageCount > 9 ? "9+" : messageCount}
                       </span>
