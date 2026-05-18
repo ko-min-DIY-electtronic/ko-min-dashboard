@@ -2,7 +2,7 @@ import axios from "../../axios";
 import { toast } from "sonner";
 
 const updateDeliZone = async (id, newData, originalData) => {
-  console.log("Updating delivery config:", { id, newData, originalData });
+  // console.log("Updating delivery config:", { id, newData, originalData });
 
   // Compare original and new data to find only changed fields
   const changedData = {};
@@ -28,7 +28,7 @@ const updateDeliZone = async (id, newData, originalData) => {
     changedData.reachable = newData.reachable;
   }
 
-  console.log("Changed fields only:", changedData);
+  // console.log("Changed fields only:", changedData);
 
   // If no changes, don't make API call
   if (Object.keys(changedData).length === 0) {

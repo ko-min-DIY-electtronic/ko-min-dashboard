@@ -123,10 +123,10 @@ function Navbar() {
     socket.connect();
     socket.emit("admin:join", "admin");
 
-    console.log("socket connected", socket.connected);
+    // console.log("socket connected", socket.connected);
 
     socket.on("admin:new_message", (data) => {
-      console.log("New chat message received:", data);
+      // console.log("New chat message received:", data);
 
       if (!location.pathname.includes("/chat")) {
         setMessageCount((prev) => prev + 1);
@@ -138,7 +138,7 @@ function Navbar() {
     };
   }, []);
 
-  console.log("messageCount", messageCount);
+  // console.log("messageCount", messageCount);
 
   useEffect(() => {
     // Clear message count when visiting chat page

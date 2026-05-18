@@ -17,7 +17,7 @@ function GetAllProduct() {
   const getProducts = async () => {
     setLoading(true);
     const response = await getAllProducts(id);
-    console.log("response", response);
+    // console.log("response", response);
     if (response.success) {
       const filterDelete = response.data.filter(
         (product) => product.isDeleted === false,

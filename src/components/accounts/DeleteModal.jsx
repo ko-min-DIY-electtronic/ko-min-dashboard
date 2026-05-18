@@ -15,7 +15,7 @@ export default function DeleteConfirmationModal({
     if (inputValue === user?.name) {
       try {
         const res = await deleteAccount(user._id);
-        console.log("res", res);
+        // console.log("res", res);
         if (res.code === 200) {
           onClose();
           refetch();

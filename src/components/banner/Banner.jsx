@@ -15,7 +15,7 @@ function Banner() {
     setError(null);
     try {
       const response = await getAllBanners();
-      console.log("Banner response:", response);
+      // console.log("Banner response:", response);
 
       if (response.status === "success") {
         setBanners(response.data);

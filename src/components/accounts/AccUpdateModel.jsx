@@ -3,7 +3,7 @@ import Modal from "../utli/Modal";
 import updatePassword from "../../api/accountApi/updatePassword";
 import updateDepartment from "../../api/accountApi/updateDeperment";
 const UpdateModel = ({ isOpen, onClose, isPasswordOpen, onSubmit, user }) => {
-  console.log(user);
+  // console.log(user);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [department, setDepartment] = useState("");
@@ -30,7 +30,7 @@ const UpdateModel = ({ isOpen, onClose, isPasswordOpen, onSubmit, user }) => {
       name: name,
     };
     const response = await updateDepartment({ id: user?._id, data });
-    console.log(response);
+    // console.log(response);
     if (response.success) {
       handleClose();
       onSubmit();
@@ -45,7 +45,7 @@ const UpdateModel = ({ isOpen, onClose, isPasswordOpen, onSubmit, user }) => {
       confirmPassword,
     };
     const response = await updatePassword({ id: user?._id, data });
-    console.log(response);
+    // console.log(response);
     if (response.code === 200) {
       handleClose();
     }

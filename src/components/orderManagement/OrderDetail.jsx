@@ -42,7 +42,7 @@ export default function OrderDetails() {
     }
     setLoading(false);
   };
-  console.log(order);
+  // console.log(order);
 
   const handlePrintClick = (voucherImageUrl) => {
     // console.log(voucherImageUrl);
@@ -116,7 +116,7 @@ export default function OrderDetails() {
 
   const handlePrintPDF = async () => {
     const res = await getReceiptImage(id);
-    console.log(res);
+    // console.log(res);
     if (res.code === 201) {
       handlePrintClick(res.data.receiptImage.cdnUrl);
     }

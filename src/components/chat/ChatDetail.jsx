@@ -66,7 +66,7 @@ const ChatDetail = () => {
     // Join the conversation room
     const emitJoin = () => {
       socket.emit("chat:join", conversationId);
-      console.log("Joined conversation room:", conversationId);
+      // console.log("Joined conversation room:", conversationId);
     };
 
     emitJoin();

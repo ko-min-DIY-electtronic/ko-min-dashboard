@@ -2,7 +2,7 @@ import axios from "../../axios";
 import { toast } from "sonner";
 
 const createDeliZone = async (data) => {
-  console.log(data);
+  // console.log(data);
   const toastId = toast.loading("Creating deli zone...");
   try {
     const response = await axios.post(`delivery`, data);

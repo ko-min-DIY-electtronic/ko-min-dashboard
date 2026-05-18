@@ -38,8 +38,6 @@ export default function SalesReport() {
   };
 
   const fetchSalesReport = async (isRefresh = false) => {
-    if (!startDate || !endDate) return;
-
     if (isRefresh) {
       setRefreshing(true);
     } else {
@@ -49,7 +47,11 @@ export default function SalesReport() {
     try {
       const startDateStr = formatDateForAPI(startDate);
       const endDateStr = formatDateForAPI(endDate);
-      const response = await getSalesReport(startDateStr, endDateStr, paymentMethod);
+      const response = await getSalesReport(
+        startDateStr,
+        endDateStr,
+        paymentMethod,
+      );
       setSalesReport(response);
     } catch (error) {
       console.error("Error fetching sales report:", error);
@@ -60,6 +62,7 @@ export default function SalesReport() {
   };
 
   const fetchProductReport = async (isRefresh = false) => {
+    // console.log("fetchProductReport", startDate, endDate);
     if (!startDate || !endDate) return;
 
     if (isRefresh) {
@@ -144,8 +147,7 @@ export default function SalesReport() {
               Sales Report
             </h1>
             <p className="text-gray-600">
-              Last updated:{" "}
-              {new Date().toLocaleString()}
+              Last updated: {new Date().toLocaleString()}
             </p>
           </div>
 
@@ -202,4 +204,3 @@ export default function SalesReport() {
     </div>
   );
 }
-

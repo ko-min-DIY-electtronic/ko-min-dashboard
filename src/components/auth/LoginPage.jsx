@@ -18,11 +18,11 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const res = await handleLogin({ name, password });
-    console.log(res);
+    // console.log(res);
 
     if (res.success) {
       const token = res.data.token;
-      console.log(token);
+      // console.log(token);
       // const user = {
       //   name: username,
       //   role: res.data.user.role,

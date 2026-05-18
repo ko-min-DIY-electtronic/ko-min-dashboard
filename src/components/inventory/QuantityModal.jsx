@@ -56,7 +56,7 @@ const QuantityModal = ({ isOpen, onClose, cancel, product }) => {
       id: product.productCode,
       data: { quantityChange: method === "add" ? newQuantity : -newQuantity },
     });
-    console.log(res);
+    // console.log(res);
     if (res.success) {
       onClose();
       setMethod(null);

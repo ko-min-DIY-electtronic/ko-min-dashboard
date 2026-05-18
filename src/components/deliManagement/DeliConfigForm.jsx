@@ -10,7 +10,7 @@ export const DeliveryConfigForm = ({
   isEditing,
   refetch,
 }) => {
-  console.log(isEditing);
+  // console.log(isEditing);
   const [formData, setFormData] = useState(() =>
     createDeliveryConfig(initialData),
   );
@@ -89,10 +89,11 @@ export const DeliveryConfigForm = ({
               id="city"
               value={formData.city}
               onChange={(e) => handleInputChange("city", e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.city
-                ? "border-red-300 bg-red-50"
-                : "border-gray-300 hover:border-gray-400"
-                }`}
+              className={`w-full px-4 py-3 border rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.city
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300 hover:border-gray-400"
+              }`}
               placeholder="Enter city name"
             />
             {errors.city && (
@@ -113,14 +114,17 @@ export const DeliveryConfigForm = ({
               id="township"
               value={formData.township}
               onChange={(e) => handleInputChange("township", e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.township
-                ? "border-red-300 bg-red-50"
-                : "border-gray-300 hover:border-gray-400"
-                }`}
+              className={`w-full px-4 py-3 border rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.township
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300 hover:border-gray-400"
+              }`}
               placeholder="Enter township name"
             />
             {errors.township && (
-              <p className="text-sm text-red-600 font-medium">{errors.township}</p>
+              <p className="text-sm text-red-600 font-medium">
+                {errors.township}
+              </p>
             )}
           </div>
         </div>
@@ -144,10 +148,11 @@ export const DeliveryConfigForm = ({
                 onChange={(e) =>
                   handleInputChange("deliveryFee", Number(e.target.value))
                 }
-                className={`w-full pl-8 pr-4 py-3 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.deliveryFee
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300 hover:border-gray-400"
-                  }`}
+                className={`w-full pl-8 pr-4 py-3 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.deliveryFee
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300 hover:border-gray-400"
+                }`}
                 placeholder="0.00"
               />
               <span className="left-3 top-3 text-gray-500 font-medium me-2">
@@ -203,17 +208,20 @@ export const DeliveryConfigForm = ({
               onClick={() =>
                 handleInputChange("reachable", !formData.reachable)
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${formData.reachable ? "bg-green-500" : "bg-gray-300"
-                }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                formData.reachable ? "bg-green-500" : "bg-gray-300"
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.reachable ? "translate-x-6" : "translate-x-1"
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  formData.reachable ? "translate-x-6" : "translate-x-1"
+                }`}
               />
             </button>
             <span
-              className={`text-sm font-medium ${formData.reachable ? "text-green-600" : "text-gray-500"
-                }`}
+              className={`text-sm font-medium ${
+                formData.reachable ? "text-green-600" : "text-gray-500"
+              }`}
             >
               {formData.reachable ? "Reachable" : "Not Reachable"}
             </span>

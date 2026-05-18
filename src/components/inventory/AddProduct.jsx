@@ -85,7 +85,7 @@ const ProductForm = () => {
     // setLoading(true);
     const response = await getAllCategory();
     if (response.success) {
-      console.log(response.data);
+      // console.log(response.data);
       setCategoryOptions(
         response.data.items.map((category) => category.category),
       );
@@ -169,7 +169,10 @@ const ProductForm = () => {
     // data.append("productType", "regular");
     data.append("category", formData.productCategory);
     data.append("isDiscounted", formData.isDiscounted);
-    data.append("discountPercentage", formData.isDiscounted ? formData.discountPercentage : 0);
+    data.append(
+      "discountPercentage",
+      formData.isDiscounted ? formData.discountPercentage : 0,
+    );
 
     // Send tags as multiple entries
     formData.tags.forEach((tag, index) => {
@@ -192,15 +195,15 @@ const ProductForm = () => {
         price.qty.toString().trim() !== "" &&
         price.price.toString().trim() !== "",
     );
-    console.log("validWholesalePrices", validWholesalePrices);
+    // console.log("validWholesalePrices", validWholesalePrices);
     validWholesalePrices.forEach((price, index) => {
       data.append(`wholeSale[${index}][wholeSaleQuantity]`, price.qty);
       data.append(`wholeSale[${index}][wholeSaleUnitPrice]`, price.price);
     });
-    console.log(data);
+    // console.log(data);
 
     const res = await addProduct(data);
-    console.log("res", res);
+    // console.log("res", res);
     if (res.success) {
       navigate("/");
     }
@@ -303,8 +306,9 @@ const ProductForm = () => {
                   onBlur={handleBlur}
                   placeholder="Enter Product Name"
                   required
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.productName ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.productName ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
                 {errors.productName && (
                   <p className="mt-1 text-sm text-red-600">
@@ -327,8 +331,9 @@ const ProductForm = () => {
                     onBlur={handleBlur}
                     placeholder="Enter Product Code"
                     required
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.productCode ? "border-red-500" : "border-gray-300"
-                      }`}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.productCode ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
                   {errors.productCode && (
                     <p className="mt-1 text-sm text-red-600">
@@ -349,10 +354,11 @@ const ProductForm = () => {
                       onBlur={handleBlur}
                       placeholder="Enter Retail Price"
                       required
-                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.retailPrice
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.retailPrice
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     />
                     <span className="absolute right-3 top-2 text-sm text-gray-500">
                       MMK
@@ -381,10 +387,11 @@ const ProductForm = () => {
                       onBlur={handleBlur}
                       placeholder="Enter Quantity"
                       required
-                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.totalQuantity
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.totalQuantity
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     />
                     <span className="absolute right-3 top-2 text-sm text-gray-500">
                       PCS
@@ -410,8 +417,9 @@ const ProductForm = () => {
                       onBlur={handleBlur}
                       placeholder="Enter Weight"
                       required
-                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.weight ? "border-red-500" : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.weight ? "border-red-500" : "border-gray-300"
+                      }`}
                     />
                     <span className="absolute right-3 top-2 text-sm text-gray-500">
                       KG
@@ -436,8 +444,9 @@ const ProductForm = () => {
                   placeholder="Describe what this kind of product is"
                   rows={4}
                   required
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${errors.description ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
+                    errors.description ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-red-600">
@@ -625,10 +634,11 @@ const ProductForm = () => {
                     onFocus={() => setIsCategoryDropdownOpen(true)}
                     placeholder="Enter Product Category"
                     // required
-                    className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.productCategory
-                      ? "border-red-500"
-                      : "border-gray-300"
-                      }`}
+                    className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.productCategory
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
                   <button
                     type="button"
@@ -656,15 +666,15 @@ const ProductForm = () => {
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                       {filteredCategories.length > 0
                         ? filteredCategories.map((category, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleCategorySelect(category)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                          >
-                            {category}
-                          </button>
-                        ))
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => handleCategorySelect(category)}
+                              className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                            >
+                              {category}
+                            </button>
+                          ))
                         : null}
                     </div>
                   )}

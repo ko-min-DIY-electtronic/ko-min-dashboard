@@ -2,7 +2,7 @@ import axios from "../../axios";
 import { toast } from "sonner";
 
 const deleteDeliZone = async (id) => {
-  console.log("Deleting delivery config:", id);
+  // console.log("Deleting delivery config:", id);
   const toastId = toast.loading("Deleting delivery configuration...");
   try {
     const response = await axios.delete(`delivery/${id}`);

@@ -15,7 +15,7 @@ function Inventory() {
     // console.log("getCategory");
     setLoading(true);
     const response = await getAllCategory();
-    console.log("response", response);
+    // console.log("response", response);
     if (response.success) {
       setCategory(response.data.items);
       setLoading(false);
@@ -24,7 +24,7 @@ function Inventory() {
     }
   };
 
-  console.log("category", category);
+  // console.log("category", category);
 
   useEffect(() => {
     getCategory();

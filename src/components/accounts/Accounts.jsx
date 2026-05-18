@@ -13,7 +13,7 @@ function Accounts() {
   const fetchUsers = async () => {
     try {
       const res = await getAllUsers();
-      console.log(res);
+      // console.log(res);
       if (res.code === 200) {
         const filteredUsers = res.data.accounts.filter(
           (user) => !user.softDeleted,

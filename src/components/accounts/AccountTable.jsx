@@ -18,7 +18,7 @@ const AccountTable = ({ users, refetch }) => {
   };
 
   const truncateName = (name, wordLimit = 8) => {
-    console.log(name);
+    // console.log(name);
     if (!name) return "";
     const words = name.slice(0, wordLimit);
     console.log(words);

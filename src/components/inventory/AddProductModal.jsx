@@ -195,7 +195,7 @@ const AddStockModal = ({ isOpen, onClose, onSubmit }) => {
   };
 
   const handleAddStock = async (stockData) => {
-    console.log("Adding new stock:", stockData);
+    // console.log("Adding new stock:", stockData);
     const data = new FormData();
     data.append("name", stockData.stockName);
     data.append("code", stockData.stockCode);

@@ -27,7 +27,7 @@ export const DeliveryConfigManager = () => {
   const getDeliverZone = async () => {
     try {
       const response = await getAllDeliverZone();
-      console.log(response);
+      // console.log(response);
       if (response.status === "success") {
         setConfigs(response.data);
       }

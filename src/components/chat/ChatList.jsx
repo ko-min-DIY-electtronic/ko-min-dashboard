@@ -24,21 +24,27 @@ const ChatList = () => {
   // ── Socket: listen for new messages to update the list in real-time ──
   useEffect(() => {
     socket.connect();
-    socket.emit('admin:join', 'admin');
+    socket.emit("admin:join", "admin");
 
-    console.log("socket connected", socket.connected);
+    // console.log("socket connected", socket.connected);
 
     socket.on("admin:new_message", (data) => {
-      console.log("New chat message received:", data);
+      // console.log("New chat message received:", data);
       const { conversation, message, conversationId } = data;
 
       // Extract details safely, supporting both new format and potentially old format
-      const lastMessage = conversation?.lastMessage || message?.message || data.message;
-      const lastMessageAt = conversation?.lastMessageAt || message?.createdAt || data.createdAt || new Date().toISOString();
+      const lastMessage =
+        conversation?.lastMessage || message?.message || data.message;
+      const lastMessageAt =
+        conversation?.lastMessageAt ||
+        message?.createdAt ||
+        data.createdAt ||
+        new Date().toISOString();
       const isRead = conversation ? conversation.isRead : false;
 
       setConversations((prev) => {
-        const idToFind = conversationId || conversation?._id || data.conversationId;
+        const idToFind =
+          conversationId || conversation?._id || data.conversationId;
         const existingIndex = prev.findIndex((c) => c._id === idToFind);
 
         if (existingIndex !== -1) {
@@ -72,7 +78,7 @@ const ChatList = () => {
     try {
       setLoading(true);
       const response = await getConversations(currentPage, 10);
-      console.log("Conversations:", response.data.conversations);
+      // console.log("Conversations:", response.data.conversations);
       setConversations(response.data.conversations);
       setPagination(response.data.pagination);
     } catch (error) {
@@ -141,17 +147,26 @@ const ChatList = () => {
               <div
                 key={conversation._id}
                 onClick={() => handleConversationClick(conversation._id)}
-                className={`p-4 hover:bg-gray-100 transition-colors cursor-pointer border-l-4 ${!conversation.isRead
-                  ? "bg-blue-50/40 border-blue-500 shadow-sm"
-                  : "bg-white border-transparent"
-                  }`}
+                className={`p-4 hover:bg-gray-100 transition-colors cursor-pointer border-l-4 ${
+                  !conversation.isRead
+                    ? "bg-blue-50/40 border-blue-500 shadow-sm"
+                    : "bg-white border-transparent"
+                }`}
               >
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 relative">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${!conversation.isRead ? "bg-blue-200" : "bg-gray-100"
-                      }`}>
-                      <User className={`h-6 w-6 ${!conversation.isRead ? "text-blue-700" : "text-gray-500"
-                        }`} />
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                        !conversation.isRead ? "bg-blue-200" : "bg-gray-100"
+                      }`}
+                    >
+                      <User
+                        className={`h-6 w-6 ${
+                          !conversation.isRead
+                            ? "text-blue-700"
+                            : "text-gray-500"
+                        }`}
+                      />
                     </div>
                     {!conversation.isRead && (
                       <span className="absolute -top-1 -right-1 flex h-4 w-4">
@@ -163,12 +178,22 @@ const ChatList = () => {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className={`text-sm tracking-tight truncate ${!conversation.isRead ? "font-bold text-gray-900" : "font-medium text-gray-700"
-                        }`}>
+                      <h3
+                        className={`text-sm tracking-tight truncate ${
+                          !conversation.isRead
+                            ? "font-bold text-gray-900"
+                            : "font-medium text-gray-700"
+                        }`}
+                      >
                         {conversation?.userId?.userName}
                       </h3>
-                      <span className={`text-xs ${!conversation.isRead ? "text-blue-600 font-bold" : "text-gray-500"
-                        }`}>
+                      <span
+                        className={`text-xs ${
+                          !conversation.isRead
+                            ? "text-blue-600 font-bold"
+                            : "text-gray-500"
+                        }`}
+                      >
                         {formatTime(conversation.lastMessageAt)}
                       </span>
                     </div>
@@ -178,14 +203,33 @@ const ChatList = () => {
                         <p className="text-xs text-gray-400 mb-1">
                           {conversation?.userId?.phoneNumber}
                         </p>
-                        <p className={`text-sm truncate ${!conversation.isRead ? "text-gray-900 font-bold" : "text-gray-600 font-normal"
-                          }`}>
-                          {conversation.lastMessage?.startsWith('http') ? (
+                        <p
+                          className={`text-sm truncate ${
+                            !conversation.isRead
+                              ? "text-gray-900 font-bold"
+                              : "text-gray-600 font-normal"
+                          }`}
+                        >
+                          {conversation.lastMessage?.startsWith("http") ? (
                             <span className="flex items-center gap-1.5 italic">
-                              {conversation.lastMessage.includes('chat-images') ? (
-                                <><span role="img" aria-label="photo">📷</span> Photo</>
-                              ) : conversation.lastMessage.includes('chat-voice') ? (
-                                <><span role="img" aria-label="voice">🎤</span> Voice message</>
+                              {conversation.lastMessage.includes(
+                                "chat-images",
+                              ) ? (
+                                <>
+                                  <span role="img" aria-label="photo">
+                                    📷
+                                  </span>{" "}
+                                  Photo
+                                </>
+                              ) : conversation.lastMessage.includes(
+                                  "chat-voice",
+                                ) ? (
+                                <>
+                                  <span role="img" aria-label="voice">
+                                    🎤
+                                  </span>{" "}
+                                  Voice message
+                                </>
                               ) : (
                                 conversation.lastMessage
                               )}

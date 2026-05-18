@@ -3,7 +3,6 @@ import {
   MdShoppingCart,
   MdPayment,
   MdLocalShipping,
-  MdCheckCircle,
   MdHistory,
   MdOutlinePendingActions,
   MdAttachMoney,
@@ -23,16 +22,20 @@ const StatCard = ({ title, value, icon: Icon, color = "bg-gray-100" }) => (
   </div>
 );
 
-export default function SalesOverview({ salesReport, formatCurrency, startDate, endDate }) {
+export default function SalesOverview({
+  salesReport,
+  formatCurrency,
+  startDate,
+  endDate,
+}) {
   const overview = salesReport?.data?.overview;
   const orders = salesReport?.data?.orders || [];
 
   return (
     <div className="mb-8">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">
-        Sales Overview (
-        {startDate ? startDate.toLocaleDateString() : "Start"} to{" "}
-        {endDate ? endDate.toLocaleDateString() : "End"})
+        Sales Overview ({startDate ? startDate.toLocaleDateString() : "Start"}{" "}
+        to {endDate ? endDate.toLocaleDateString() : "End"})
       </h2>
 
       {/* Overview Stats */}
@@ -76,18 +79,29 @@ export default function SalesOverview({ salesReport, formatCurrency, startDate, 
           </div>
           <div className="space-y-4">
             {overview?.byStatus?.map((status, idx) => (
-              <div key={idx} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <div
+                key={idx}
+                className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100"
+              >
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-900 capitalize">{status.status}</span>
-                  <span className="text-xs text-gray-500">{status.count} Orders</span>
+                  <span className="text-sm font-medium text-gray-900 capitalize">
+                    {status.status}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {status.count} Orders
+                  </span>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-gray-900">{formatCurrency(status.totalAmount)} MMK</p>
+                  <p className="font-bold text-gray-900">
+                    {formatCurrency(status.totalAmount)} MMK
+                  </p>
                 </div>
               </div>
             ))}
             {!overview?.byStatus?.length && (
-              <p className="text-center text-gray-500 py-4">No status data available</p>
+              <p className="text-center text-gray-500 py-4">
+                No status data available
+              </p>
             )}
           </div>
         </div>
@@ -104,7 +118,10 @@ export default function SalesOverview({ salesReport, formatCurrency, startDate, 
           </div>
           <div className="space-y-4">
             {overview?.byPaymentMethod?.map((method, idx) => (
-              <div key={idx} className="border border-gray-100 rounded-lg p-4 bg-gray-50">
+              <div
+                key={idx}
+                className="border border-gray-100 rounded-lg p-4 bg-gray-50"
+              >
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-gray-900 capitalize">
                     {method.paymentMethod.replace(/-/g, " ")}
@@ -114,14 +131,18 @@ export default function SalesOverview({ salesReport, formatCurrency, startDate, 
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-gray-500 mb-3">
-                  <span>{method.count} Total ({method.successfulOrders} Success)</span>
-                  <span>Avg: {formatCurrency(method.avgOrderValue || 0)} MMK</span>
+                  <span>
+                    {method.count} Total ({method.successfulOrders} Success)
+                  </span>
+                  <span>
+                    Avg: {formatCurrency(method.avgOrderValue || 0)} MMK
+                  </span>
                 </div>
 
                 {/* Progress Bar for Success Rate */}
                 <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
                   <div
-                    className={`h-1.5 rounded-full ${method.successRate > 75 ? 'bg-green-500' : method.successRate > 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                    className={`h-1.5 rounded-full ${method.successRate > 75 ? "bg-green-500" : method.successRate > 40 ? "bg-yellow-500" : "bg-red-500"}`}
                     style={{ width: `${method.successRate || 0}%` }}
                   ></div>
                 </div>
@@ -132,7 +153,9 @@ export default function SalesOverview({ salesReport, formatCurrency, startDate, 
               </div>
             ))}
             {!overview?.byPaymentMethod?.length && (
-              <p className="text-center text-gray-500 py-4">No payment data available</p>
+              <p className="text-center text-gray-500 py-4">
+                No payment data available
+              </p>
             )}
           </div>
         </div>
@@ -162,7 +185,10 @@ export default function SalesOverview({ salesReport, formatCurrency, startDate, 
             <tbody className="divide-y divide-gray-100">
               {orders.length > 0 ? (
                 orders.map((order) => (
-                  <tr key={order._id} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={order._id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       #{order.orderId.slice(-8).toUpperCase()}
                     </td>
@@ -170,11 +196,15 @@ export default function SalesOverview({ salesReport, formatCurrency, startDate, 
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        order.status === "confirmed" ? "bg-green-100 text-green-700" :
-                        order.status === "pending" ? "bg-yellow-100 text-yellow-700" :
-                        "bg-red-100 text-red-700"
-                      }`}>
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          order.status === "confirmed"
+                            ? "bg-green-100 text-green-700"
+                            : order.status === "pending"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
+                        }`}
+                      >
                         {order.status}
                       </span>
                     </td>
@@ -188,7 +218,10 @@ export default function SalesOverview({ salesReport, formatCurrency, startDate, 
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                  <td
+                    colSpan="5"
+                    className="px-6 py-10 text-center text-gray-500"
+                  >
                     No orders found for this period
                   </td>
                 </tr>
@@ -200,4 +233,3 @@ export default function SalesOverview({ salesReport, formatCurrency, startDate, 
     </div>
   );
 }
-
