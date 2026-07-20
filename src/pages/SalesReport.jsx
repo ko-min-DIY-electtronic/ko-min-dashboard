@@ -20,14 +20,10 @@ export default function SalesReport() {
   const [activeReportTab, setActiveReportTab] = useState("overview"); // 'overview' or 'products'
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  // Initialize dates to last 30 days
-  const [startDate, setStartDate] = useState(() => {
-    const thirtyDaysAgo = new Date(getToday());
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return thirtyDaysAgo;
-  });
+  const [startDate, setStartDate] = useState(getToday());
   const [endDate, setEndDate] = useState(getToday());
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [status, setStatus] = useState("confirmed");
 
   const formatDateForAPI = (date) => {
     if (!date) return null;
@@ -51,6 +47,7 @@ export default function SalesReport() {
         startDateStr,
         endDateStr,
         paymentMethod,
+        status,
       );
       setSalesReport(response);
     } catch (error) {
@@ -114,8 +111,8 @@ export default function SalesReport() {
   }
 
   return (
-    <div className="h-[calc(100vh-50px)] overflow-y-auto px-5 py-6">
-      <div className="">
+    <div className="h-[calc(100vh-50px)] overflow-y-auto overflow-x-hidden px-5 py-6">
+      <div className="overflow-hidden">
         {/* Tabs */}
         <div className="flex border-b border-gray-200 mb-6 font-primary">
           <button
@@ -151,13 +148,26 @@ export default function SalesReport() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
+            {/* Status Filter - Only show for Overview */}
+            {activeReportTab === "overview" && (
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 w-full sm:w-auto sm:min-w-[160px]"
+              >
+                <option value="confirmed">Confirmed</option>
+                <option value="success">Success</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            )}
+
             {/* Payment Method Filter - Only show for Overview */}
             {activeReportTab === "overview" && (
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 min-w-[160px]"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 w-full sm:w-auto sm:min-w-[160px]"
               >
                 <option value="">All Payment Methods</option>
                 <option value="cash-on-delivery">Cash on Delivery</option>

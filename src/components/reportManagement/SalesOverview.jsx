@@ -172,7 +172,7 @@ export default function SalesOverview({
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="text-left">
             <thead className="bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-3">Order ID</th>

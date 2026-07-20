@@ -1,10 +1,10 @@
 import axios from "../../axios";
 import { toast } from "sonner";
 
-const getSalesReport = async (startDate, endDate, paymentMethod = "") => {
+const getSalesReport = async (startDate, endDate, paymentMethod = "", status = "confirmed") => {
   const toastId = toast.loading("Loading sales report...");
   try {
-    let url = `report/sales?status=confirmed`;
+    let url = `report/sales?status=${status}`;
     const params = new URLSearchParams();
     if (startDate) {
       params.append("startDate", startDate);

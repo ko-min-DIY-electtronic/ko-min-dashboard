@@ -138,7 +138,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               ranges={[dateRange]}
               onChange={handleSelect}
               moveRangeOnFirstSelection={false}
-              months={isMobile ? 1 : 2}
+              months={1}
               direction={isMobile ? "vertical" : "horizontal"}
               rangeColors={["#3b82f6"]}
             />
