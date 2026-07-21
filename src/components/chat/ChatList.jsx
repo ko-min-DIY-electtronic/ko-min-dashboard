@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, Clock, User } from "lucide-react";
+import { MessageCircle, User, Search, Image as ImageIcon, Mic, RefreshCw } from "lucide-react";
 import io from "socket.io-client";
 import { getConversations } from "../../api/chatApi/getConversations";
 import Loading from "../utli/Loading";
@@ -16,23 +16,23 @@ const ChatList = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchConversations();
-  }, [currentPage]);
+    const timer = setTimeout(() => {
+      fetchConversations();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [currentPage, searchTerm]);
 
   // ── Socket: listen for new messages to update the list in real-time ──
   useEffect(() => {
     socket.connect();
     socket.emit("admin:join", "admin");
 
-    // console.log("socket connected", socket.connected);
-
     socket.on("admin:new_message", (data) => {
-      // console.log("New chat message received:", data);
       const { conversation, message, conversationId } = data;
 
-      // Extract details safely, supporting both new format and potentially old format
       const lastMessage =
         conversation?.lastMessage || message?.message || data.message;
       const lastMessageAt =
@@ -48,11 +48,9 @@ const ChatList = () => {
         const existingIndex = prev.findIndex((c) => c._id === idToFind);
 
         if (existingIndex !== -1) {
-          // Conversation exists — update & move to top
           const updated = [...prev];
           const [conv] = updated.splice(existingIndex, 1);
 
-          // Update existing conversation state with new data from payload
           const updatedConv = {
             ...conv,
             lastMessage: lastMessage,
@@ -62,7 +60,6 @@ const ChatList = () => {
 
           return [updatedConv, ...updated];
         } else {
-          // New conversation (not in current list) — re-fetch to get full conversation data
           fetchConversations();
           return prev;
         }
@@ -77,10 +74,9 @@ const ChatList = () => {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const response = await getConversations(currentPage, 10);
-      // console.log("Conversations:", response.data.conversations);
-      setConversations(response.data.conversations);
-      setPagination(response.data.pagination);
+      const response = await getConversations(currentPage, 10, searchTerm);
+      setConversations(response.data.conversations || []);
+      setPagination(response.data.pagination || {});
     } catch (error) {
       console.error("Error fetching conversations:", error);
     } finally {
@@ -89,6 +85,7 @@ const ChatList = () => {
   };
 
   const formatTime = (dateString) => {
+    if (!dateString) return "";
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = (now - date) / (1000 * 60 * 60);
@@ -115,161 +112,201 @@ const ChatList = () => {
     navigate(`/chat/${conversationId}`);
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const unreadCount = conversations.filter((c) => !c.isRead).length;
+
   if (loading && conversations.length === 0) {
     return <Loading />;
   }
 
   return (
-    <div className="w-full h-screen p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Chat Conversations
-        </h1>
-        <p className="text-gray-600">
-          Manage customer conversations and support tickets
-        </p>
+    <div className="h-[calc(100vh-20px)] w-full px-3 sm:px-6 py-4 flex flex-col overflow-hidden">
+      {/* Fixed Header & Controls */}
+      <div className="flex-shrink-0 mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="header text-xl sm:text-2xl ml-8 lg:ml-0">
+              Chat Conversations
+            </h1>
+            {unreadCount > 0 && (
+              <span className="px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full border border-blue-200">
+                {unreadCount} Unread
+              </span>
+            )}
+          </div>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Manage customer support messages and live inquiries
+          </p>
+        </div>
+
+        {/* Search & Actions */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64 sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by customer name"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all shadow-sm"
+            />
+          </div>
+          <button
+            onClick={fetchConversations}
+            disabled={loading}
+            className="p-2 border border-gray-300 rounded-xl bg-white hover:bg-gray-50 text-gray-600 transition-colors shadow-sm disabled:opacity-50"
+            title="Refresh conversations"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      {/* Internal Scrollable Conversations Container */}
+      <div className="flex-1 min-h-0 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
         {conversations.length === 0 ? (
-          <div className="text-center py-12">
-            <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No conversations yet
+          <div className="text-center py-16 px-4 my-auto">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MessageCircle className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">
+              {searchTerm ? "No matching conversations" : "No conversations yet"}
             </h3>
-            <p className="text-gray-500">
-              Customer conversations will appear here when they start chatting.
+            <p className="text-sm text-gray-500 max-w-sm mx-auto">
+              {searchTerm
+                ? `No user found matching "${searchTerm}". Try searching with a different keyword.`
+                : "Customer conversations will appear here in real-time when they start chatting."}
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
-            {conversations.map((conversation) => (
-              <div
-                key={conversation._id}
-                onClick={() => handleConversationClick(conversation._id)}
-                className={`p-4 hover:bg-gray-100 transition-colors cursor-pointer border-l-4 ${
-                  !conversation.isRead
-                    ? "bg-blue-50/40 border-blue-500 shadow-sm"
+          <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-gray-100">
+            {conversations.map((conversation) => {
+              const isUnread = !conversation.isRead;
+              const isMediaMessage = conversation.lastMessage?.startsWith("http");
+              const isPhoto = isMediaMessage && conversation.lastMessage?.includes("chat-images");
+              const isVoice = isMediaMessage && conversation.lastMessage?.includes("chat-voice");
+
+              return (
+                <div
+                  key={conversation._id}
+                  onClick={() => handleConversationClick(conversation._id)}
+                  className={`p-3.5 sm:p-4 hover:bg-gray-50/80 transition-all cursor-pointer border-l-4 ${isUnread
+                    ? "bg-blue-50/50 border-blue-500"
                     : "bg-white border-transparent"
-                }`}
-              >
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 relative">
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        !conversation.isRead ? "bg-blue-200" : "bg-gray-100"
-                      }`}
-                    >
-                      <User
-                        className={`h-6 w-6 ${
-                          !conversation.isRead
-                            ? "text-blue-700"
-                            : "text-gray-500"
-                        }`}
-                      />
-                    </div>
-                    {!conversation.isRead && (
-                      <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-600 border-2 border-white"></span>
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3
-                        className={`text-sm tracking-tight truncate ${
-                          !conversation.isRead
-                            ? "font-bold text-gray-900"
-                            : "font-medium text-gray-700"
-                        }`}
-                      >
-                        {conversation?.userId?.userName}
-                      </h3>
-                      <span
-                        className={`text-xs ${
-                          !conversation.isRead
-                            ? "text-blue-600 font-bold"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {formatTime(conversation.lastMessageAt)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-xs text-gray-400 mb-1">
-                          {conversation?.userId?.phoneNumber}
-                        </p>
-                        <p
-                          className={`text-sm truncate ${
-                            !conversation.isRead
-                              ? "text-gray-900 font-bold"
-                              : "text-gray-600 font-normal"
+                    }`}
+                >
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    {/* Avatar & Badge */}
+                    <div className="flex-shrink-0 relative">
+                      <div
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-colors ${isUnread
+                          ? "bg-blue-100 text-blue-700 font-semibold"
+                          : "bg-gray-100 text-gray-600"
                           }`}
+                      >
+                        <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </div>
+                      {isUnread && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-blue-600 border-2 border-white"></span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Content Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <h3
+                          className={`text-sm sm:text-base tracking-tight truncate ${isUnread
+                            ? "font-bold text-gray-900"
+                            : "font-semibold text-gray-800"
+                            }`}
                         >
-                          {conversation.lastMessage?.startsWith("http") ? (
-                            <span className="flex items-center gap-1.5 italic">
-                              {conversation.lastMessage.includes(
-                                "chat-images",
-                              ) ? (
-                                <>
-                                  <span role="img" aria-label="photo">
-                                    📷
-                                  </span>{" "}
-                                  Photo
-                                </>
-                              ) : conversation.lastMessage.includes(
-                                  "chat-voice",
-                                ) ? (
-                                <>
-                                  <span role="img" aria-label="voice">
-                                    🎤
-                                  </span>{" "}
-                                  Voice message
-                                </>
-                              ) : (
-                                conversation.lastMessage
-                              )}
-                            </span>
-                          ) : (
-                            conversation.lastMessage
-                          )}
-                        </p>
+                          {conversation?.userId?.userName || "Unknown Customer"}
+                        </h3>
+                        <span
+                          className={`text-xs whitespace-nowrap flex-shrink-0 ${isUnread
+                            ? "text-blue-600 font-bold"
+                            : "text-gray-400"
+                            }`}
+                        >
+                          {formatTime(conversation.lastMessageAt)}
+                        </span>
                       </div>
 
-                      {!conversation.isRead && (
-                        <div className="ml-2 bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                          New
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          {conversation?.userId?.phoneNumber && (
+                            <p className="text-xs text-gray-400 font-medium mb-0.5">
+                              {conversation.userId.phoneNumber}
+                            </p>
+                          )}
+                          <p
+                            className={`text-xs sm:text-sm truncate ${isUnread
+                              ? "text-gray-900 font-semibold"
+                              : "text-gray-500 font-normal"
+                              }`}
+                          >
+                            {isMediaMessage ? (
+                              <span className="inline-flex items-center gap-1.5 italic text-gray-600">
+                                {isPhoto ? (
+                                  <>
+                                    <ImageIcon className="w-3.5 h-3.5 text-blue-500" />
+                                    <span>Photo message</span>
+                                  </>
+                                ) : isVoice ? (
+                                  <>
+                                    <Mic className="w-3.5 h-3.5 text-emerald-500" />
+                                    <span>Voice message</span>
+                                  </>
+                                ) : (
+                                  <span>Attachment</span>
+                                )}
+                              </span>
+                            ) : (
+                              conversation.lastMessage || "No message"
+                            )}
+                          </p>
                         </div>
-                      )}
+
+                        {isUnread && (
+                          <span className="flex-shrink-0 px-2 py-0.5 bg-blue-600 text-white text-[10px] rounded-full font-bold uppercase tracking-wider shadow-sm">
+                            New
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
+        {/* Load More Button */}
         {pagination.hasMore && (
-          <div className="p-4 border-t border-gray-200">
+          <div className="flex-shrink-0 p-3.5 border-t border-gray-100 bg-gray-50/50">
             <button
               onClick={handleLoadMore}
               disabled={loading}
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-2 px-4 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center gap-2"
             >
-              {loading ? "Loading..." : "Load More"}
+              {loading && <RefreshCw className="w-4 h-4 animate-spin" />}
+              {loading ? "Loading conversations..." : "Load More Conversations"}
             </button>
           </div>
         )}
       </div>
 
+      {/* Fixed Footer Counter */}
       {pagination.totalConversations > 0 && (
-        <div className="mt-4 text-center text-sm text-gray-500">
-          Showing {conversations.length} of {pagination.totalConversations}{" "}
-          conversations
+        <div className="flex-shrink-0 pt-2 text-center text-xs sm:text-sm text-gray-500">
+          Showing {conversations.length} of {pagination.totalConversations} conversations
         </div>
       )}
     </div>

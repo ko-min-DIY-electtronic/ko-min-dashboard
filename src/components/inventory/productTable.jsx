@@ -61,11 +61,10 @@ const ProductTable = ({ products, sentQuantityModal, loading }) => {
                 setSelectedCategory(tab);
                 setIsDropdownOpen(false);
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors duration-300 text-primary  ${
-                selectedCategory === tab
-                  ? "border-b-2 border-primary"
-                  : "opacity-30"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors duration-300 text-primary  ${selectedCategory === tab
+                ? "border-b-2 border-primary"
+                : "opacity-30"
+                }`}
             >
               {tab}
             </button>
@@ -91,7 +90,7 @@ const ProductTable = ({ products, sentQuantityModal, loading }) => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto w-[calc(100vw-70px)] lg:w-auto h-[calc(100vh-230px)]">
+      <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto w-full h-[calc(100vh-230px)] custom-scrollbar">
         <table className="w-full table-auto">
           <thead
             className="bg-gray-50 border-b border-gray-200"
@@ -257,11 +256,10 @@ const ProductTable = ({ products, sentQuantityModal, loading }) => {
                   <button
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1 text-sm border rounded ${
-                      currentPage === pageNum
-                        ? "bg-blue-500 text-white border-blue-500"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
+                    className={`px-3 py-1 text-sm border rounded ${currentPage === pageNum
+                      ? "bg-blue-500 text-white border-blue-500"
+                      : "border-gray-300 hover:bg-gray-50"
+                      }`}
                   >
                     {pageNum}
                   </button>

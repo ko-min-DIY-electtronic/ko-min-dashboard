@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import getAllUsers from "../api/userApi/getAllUsers";
 import Loading from "../components/utli/Loading";
 import { MdArrowBackIosNew, MdArrowForwardIos } from "react-icons/md";
-import { Eye, Shield, ShieldOff, UserCheck, UserX } from "lucide-react";
+import { Eye, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function UserManagement() {
@@ -61,27 +61,27 @@ export default function UserManagement() {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const getStatusBadge = (user) => {
-    if (user.isBanned) {
-      return (
-        <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-          Banned
-        </span>
-      );
-    }
-    if (user.isVerified) {
-      return (
-        <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-          Verified
-        </span>
-      );
-    }
-    return (
-      <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-        Unverified
-      </span>
-    );
-  };
+  // const getStatusBadge = (user) => {
+  //   if (user.isBanned) {
+  //     return (
+  //       <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+  //         Banned
+  //       </span>
+  //     );
+  //   }
+  //   if (user.isVerified) {
+  //     return (
+  //       <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+  //         Verified
+  //       </span>
+  //     );
+  //   }
+  //   return (
+  //     <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+  //       Unverified
+  //     </span>
+  //   );
+  // };
 
   const getRoleBadge = (role) => {
     const roleColors = {
@@ -92,9 +92,8 @@ export default function UserManagement() {
 
     return (
       <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${
-          roleColors[role] || "bg-gray-100 text-gray-800"
-        }`}
+        className={`px-2 py-1 text-xs font-medium rounded-full ${roleColors[role] || "bg-gray-100 text-gray-800"
+          }`}
       >
         {role?.charAt(0).toUpperCase() + role?.slice(1)}
       </span>
@@ -106,7 +105,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="w-full px-4">
+    <div className="overflow-y-auto w-full px-4 custom-scrollbar">
       <div className="">
         {/* Header */}
         <div className="flex flex-col lg:flex-row items-center justify-between">
@@ -124,11 +123,10 @@ export default function UserManagement() {
                 setSelectedTab(tab);
                 setCurrentPage(1);
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors duration-300 ${
-                selectedTab === tab
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors duration-300 ${selectedTab === tab
+                ? "text-primary border-b-2 border-primary"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
             >
               {tab}
             </button>
@@ -136,7 +134,7 @@ export default function UserManagement() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto  w-[calc(100vw-70px)] lg:w-auto h-[calc(100vh-160px)]">
+        <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto w-[calc(100vw-70px)] lg:w-auto h-[calc(100vh-220px)]">
           <table className="w-full table-auto">
             <thead
               className="bg-gray-50 border-b border-gray-200"
@@ -296,11 +294,10 @@ export default function UserManagement() {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 text-sm border rounded ${
-                        currentPage === pageNum
-                          ? "bg-blue-500 text-white border-blue-500"
-                          : "border-gray-300 hover:bg-gray-50"
-                      }`}
+                      className={`px-3 py-1 text-sm border rounded ${currentPage === pageNum
+                        ? "bg-blue-500 text-white border-blue-500"
+                        : "border-gray-300 hover:bg-gray-50"
+                        }`}
                     >
                       {pageNum}
                     </button>

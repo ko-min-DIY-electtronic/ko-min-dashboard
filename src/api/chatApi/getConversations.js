@@ -1,10 +1,12 @@
 import axios from "../../axios";
 
-export const getConversations = async (page = 1, limit = 10) => {
+export const getConversations = async (page = 1, limit = 10, search = "") => {
   try {
-    const response = await axios.get(
-      `/conversations?page=${page}&limit=${limit}`
-    );
+    let url = `/conversations?page=${page}&limit=${limit}`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    const response = await axios.get(url);
     return response.data;
   } catch (error) {
     console.error("Error fetching conversations:", error);

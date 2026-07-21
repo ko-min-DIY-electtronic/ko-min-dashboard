@@ -40,7 +40,7 @@ function GetAllProduct() {
   };
 
   return (
-    <div className="w-full px-4">
+    <div className="h-[calc(100vh-40px)] overflow-y-auto w-full px-4 custom-scrollbar">
       <div className="flex flex-col lg:flex-row items-center justify-between ">
         <h1 className="header ml-8 lg:ml-0 flex items-center gap-2 cursor-pointer">
           <span onClick={() => navigate("/")}>Inventory</span>{" "}

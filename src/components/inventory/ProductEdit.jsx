@@ -285,7 +285,7 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="mx-auto h-[calc(100vh-4px)] overflow-y-auto">
+    <div className="h-[calc(100vh-50px)] overflow-y-auto custom-scrollbar w-full px-4 pb-6">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200">
         <h1 className="text-xl font-semibold text-gray-900">
