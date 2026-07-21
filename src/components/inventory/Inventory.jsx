@@ -10,6 +10,7 @@ function Inventory() {
   const [selectedId, setSelectedId] = useState(null);
   const [bulkPriceModalOpen, setIsBulkPriceModalOpen] = useState(false);
   const [category, setCategory] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getCategory = async () => {
     setLoading(true);
@@ -34,13 +35,26 @@ function Inventory() {
     setIsBulkPriceModalOpen(true);
   };
 
+  const filteredCategory = category.filter((item) =>
+    item.category?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="h-[calc(100vh-50px)] overflow-y-auto w-full px-4 custom-scrollbar">
-      <div className="flex flex-col lg:flex-row items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
         <h1 className="header ml-8 lg:ml-0">Inventory</h1>
+        <div className="w-full sm:w-72">
+          <input
+            type="text"
+            placeholder="Search category..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+          />
+        </div>
       </div>
       <CategoryTable
-        category={category}
+        category={filteredCategory}
         loading={loading}
         sentBulkPriceModal={getBulkPriceModal}
       />

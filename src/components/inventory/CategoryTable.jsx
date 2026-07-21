@@ -35,7 +35,7 @@ const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
   const visibleTabs = tabs.slice(0, 6);
 
   return (
-    <div className="w-full mx-auto pt-6">
+    <div className="w-full mx-auto pt-3">
       {/* Tabs */}
       {/* <div className="flex items-center justify-between">
         <div className="flex gap-2 mb-6 border-b border-gray-200 rubik">

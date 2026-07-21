@@ -146,7 +146,7 @@ function GetAllOrder() {
 
   return (
     <div className="px-4">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <h1 className="header ml-8 lg:ml-0 w-full lg:w-auto text-left">Order Management</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row items-stretch lg:items-center gap-3 w-full lg:w-auto">
