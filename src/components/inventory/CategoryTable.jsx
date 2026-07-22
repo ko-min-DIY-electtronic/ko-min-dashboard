@@ -37,7 +37,7 @@ const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
   return (
     <div className="w-full mx-auto pt-3">
       {/* Tabs */}
-      {/* <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div className="flex gap-2 mb-6 border-b border-gray-200 rubik">
           {visibleTabs.map((tab) => (
             <button
@@ -64,7 +64,7 @@ const CategoryTable = ({ category, loading, sentBulkPriceModal }) => {
           </svg>
           <span className="text-[14px]">Add Product</span>
         </button>
-      </div> */}
+      </div>
 
       {/* Table */}
       <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto w-full max-h-[calc(100vh-120px)] custom-scrollbar">
